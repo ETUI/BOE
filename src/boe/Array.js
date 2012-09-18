@@ -1,7 +1,7 @@
 /* 
  * Array extensions
  */
-define(['util'], function(util){
+define(['./util'], function(util){
 	"use strict";
 	var global = this;
 	var ARRAY_PROTO = global.Array.prototype;

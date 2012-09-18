@@ -1,7 +1,7 @@
 /* 
  * Object extensions
  */
-define(['util'], function(util){
+define(['./util'], function(util){
 	"use strict";
 	var fn = {};
 
@@ -131,4 +131,4 @@ define(['util'], function(util){
 	util.mixinAsStatic(boeObject, fn);
 
 	return boeObject;
-};
+});
