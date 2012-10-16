@@ -1,7 +1,7 @@
 /* 
  * Object extensions
  */
-define(['./util'], function(util){
+define(['boe/util'], function(util){
 	"use strict";
 	var fn = {};
 
