@@ -15,7 +15,7 @@ define(['./util'], function(util){
 	 * boeNumber(foo).toCurrency();
 	 * 
 	 */
-	boeNumber = function(num){
+	var boeNumber = function(num){
 		num = new Number(num);
 		util.mixin(num, fn);
 		return num;

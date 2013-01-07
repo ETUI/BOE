@@ -52,9 +52,8 @@ define(function(){
 	            }
 	            return __method.apply(context, args.concat(slice.call(arguments)));
 	        };
-	    }
-		
-
+	    },
+	    g: global
 	};
 
 	return ret;

@@ -3,7 +3,7 @@
  */
 define(['./util'], function(util){
 	"use strict";
-	var global = this;
+	var global = util.g;
 	var ARRAY_PROTO = global.Array.prototype;
     var UNDEF;
 	
@@ -418,7 +418,7 @@ define(['./util'], function(util){
     /*
      * Shuffle current array
      */
-    boeArray.shuffle = function() {
+    fn.shuffle = function() {
         var len = this.length;
         var l = len;
         while (l--) {
@@ -434,7 +434,7 @@ define(['./util'], function(util){
      * @param popIt default to true, false to not remove it from array
      */
 
-    boeArray.random = function(popIt){
+    fn.random = function(popIt){
         if (popIt === UNDEF){
             popIt = true;
         }

@@ -14,7 +14,7 @@ define(['./util'], function(util){
 	 * boeObject(foo).chainable();
 	 * 
 	 */
-	boeObject = function(obj){
+	var boeObject = function(obj){
 		if (this instanceof boeObject){
 			obj = new Object(obj, arguments[1]);
 		}

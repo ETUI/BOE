@@ -4,7 +4,7 @@
 define(['./util'], function(util){
     "use strict";
 
-    var global = this;
+    var global = util.g;
     var STRING_PROTO = global.String.prototype;
 
     var fn = {};
