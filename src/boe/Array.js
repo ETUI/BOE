@@ -438,7 +438,7 @@ define(['./util'], function(util){
         if (popIt === UNDEF){
             popIt = true;
         }
-        var idx = Math.random() * this.length;
+        var idx = ~~(Math.random() * this.length);
         var ret = this[idx];
 
         if (popIt){
