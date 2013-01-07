@@ -418,9 +418,9 @@ define(['boe/util'], function(util){
      * Returns true if an object is an array, false if it is not.
      * @es5
      */
-    Array.isArray || (boeArray.isArray = function (arg) {
+    boeArray.isArray = function (arg) {
         return Object.prototype.toString.call(arg) == '[object Array]';
-    });
+    };
 
 	util.mixinAsStatic(boeArray, fn);
 
