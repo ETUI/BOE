@@ -8,6 +8,7 @@ define(['./util'], function(util){
     var UNDEF;
 	
 	var fn = {};
+    var nativeFn = {};
 	
 	/**
 	 * @function etui.n.Function
@@ -31,7 +32,7 @@ define(['./util'], function(util){
      * filtering function returns true.
      * @es5
      */
-    ARRAY_PROTO.filter || (fn.filter = function(fun /*, thisp */){  
+    ARRAY_PROTO.filter ? (fn.filter = function(fun /*, thisp */){  
       
         if (this === void 0 || this === null)  
             throw new TypeError();  
@@ -56,7 +57,7 @@ define(['./util'], function(util){
         }  
       
         return res;  
-    });
+    }): (nativeFn.filter = ARRAY_PROTO.filter);
 
     /*
      * Creates a new array with the results of calling a provided function on every element in this array.
@@ -66,7 +67,7 @@ define(['./util'], function(util){
      * Reference: http://es5.github.com/#x15.4.4.19  
      * @es5
      */
-    ARRAY_PROTO.map || (fn.map = function(callback, thisArg) {  
+    ARRAY_PROTO.map ? (fn.map = function(callback, thisArg) {  
       
         var T, A, k;  
       
@@ -138,14 +139,14 @@ define(['./util'], function(util){
       
         // 9. return A  
         return A;  
-    });
+    }): (nativeFn.map = ARRAY_PROTO.map);
     
     /*
      * Returns the last index at which a given element can be found in the array,
      * or -1 if it is not present. The array is searched backwards, starting at fromIndex.
      * @es5
      */
-    ARRAY_PROTO.lastIndexOf || (fn.lastIndexOf = function(searchElement /*, fromIndex*/){
+    ARRAY_PROTO.lastIndexOf ? (fn.lastIndexOf = function(searchElement /*, fromIndex*/){
 
         if (this === void 0 || this === null){
           throw new TypeError();
@@ -178,14 +179,14 @@ define(['./util'], function(util){
             }
         }
         return -1;
-    }); 
+    }): (nativeFn.lastIndexOf = ARRAY_PROTO.lastIndexOf); 
 
     /*
      * Returns the first index at which a given element can be found in the array,
      * or -1 if it is not present.
      * @es5
      */
-    ARRAY_PROTO.indexOf || (fn.indexOf = function (searchElement /*, fromIndex */ ) {  
+    ARRAY_PROTO.indexOf ? (fn.indexOf = function (searchElement /*, fromIndex */ ) {  
         
         if (this === void 0 || this === null) {  
             throw new TypeError();  
@@ -214,7 +215,7 @@ define(['./util'], function(util){
             }  
         }  
         return -1;  
-    });
+    }):(nativeFn.indexOf = ARRAY_PROTO.indexOf);
 
     /*
      * Executes a provided function once per array element.
@@ -222,7 +223,7 @@ define(['./util'], function(util){
      */
     // Production steps of ECMA-262, Edition 5, 15.4.4.18  
     // Reference: http://es5.github.com/#x15.4.4.18  
-    ARRAY_PROTO.forEach || (fn.forEach = function( callback, thisArg ) {  
+    ARRAY_PROTO.forEach ? (fn.forEach = function( callback, thisArg ) {  
       
         var T, k;  
 
@@ -276,12 +277,12 @@ define(['./util'], function(util){
             k++;  
         }  
         // 8. return undefined  
-    }); 
+    }): (nativeFn.forEach = ARRAY_PROTO.forEach); 
 
     /**
      * Tests whether all elements in the array pass the test implemented by the provided function.
      */
-    ARRAY_PROTO.every || (fn.every = function(fun /*, thisp */){
+    ARRAY_PROTO.every ? (fn.every = function(fun /*, thisp */){
         if (this === void 0 || this === null){
             throw new TypeError();
         }
@@ -300,13 +301,13 @@ define(['./util'], function(util){
         }
 
         return true;
-    });
+    }):(nativeFn.every = ARRAY_PROTO.every);
 
     /**
      * Tests whether some element in the array passes the test implemented by the provided function.
      * @es5
      */
-    ARRAY_PROTO.some || (fn.some = function(fun /*, thisp */){
+    ARRAY_PROTO.some ? (fn.some = function(fun /*, thisp */){
 
         if (this === void 0 || this === null){
             throw new TypeError();
@@ -327,14 +328,14 @@ define(['./util'], function(util){
         }
 
         return false;
-    });
+    }): (nativeFn.some = ARRAY_PROTO.some);
 
     /*
      * Apply a function against an accumulator and each value of the array 
      * (from left-to-right) as to reduce it to a single value.
      * @es5
      */
-    ARRAY_PROTO.reduce || (fn.reduce = function reduce(accumlator){  
+    ARRAY_PROTO.reduce ? (fn.reduce = function reduce(accumlator){  
         var i, l = this.length, curr;  
           
           // ES5 : "If IsCallable(callbackfn) is false, throw a TypeError exception."  
@@ -362,14 +363,14 @@ define(['./util'], function(util){
         }  
           
         return curr;  
-    });
+    }): (nativeFn.reduce = ARRAY_PROTO.reduce);
 
     /*
      * Apply a function simultaneously against two values of the array
      * (from right-to-left) as to reduce it to a single value.
      * @es5
      */
-    ARRAY_PROTO.reduceRight || (fn.reduceRight = function(callbackfn /*, initialValue */){
+    ARRAY_PROTO.reduceRight ? (fn.reduceRight = function(callbackfn /*, initialValue */){
         if (this === void 0 || this === null){
             throw new TypeError();
         }
@@ -413,7 +414,7 @@ define(['./util'], function(util){
         }
 
         return accumulator;
-    });
+    }): (nativeFn.reduceRight = ARRAY_PROTO.reduceRight);
 
     /*
      * Shuffle current array
@@ -457,6 +458,7 @@ define(['./util'], function(util){
     };
 
 	util.mixinAsStatic(boeArray, fn);
+    util.mixinAsStatic(boeArray, nativeFn);
 
 	return boeArray;
 });

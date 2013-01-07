@@ -8,6 +8,7 @@ define(['./util'], function(util){
     var STRING_PROTO = global.String.prototype;
 
     var fn = {};
+    var nativeFn = {};
     
     /**
      * @function boeString
@@ -65,15 +66,16 @@ define(['./util'], function(util){
      * @return {String} trimed string
      * @es5
      */
-    STRING_PROTO.trim || (fn.trim = function() {
+    STRING_PROTO.trim ? (fn.trim = function() {
         var trimChar = '\\s';
         var re = new RegExp('(^' + trimChar + '*)|(' + trimChar + '*$)', 'g');
         return this.replace(re, "");
-    });
+    }):(nativeFn = STRING_PROTO.trim);
 
     // Copy over fn to n.String, and make sure the 
     // first arg to the extension method is the context
     util.mixinAsStatic(boeString, fn);
+    util.mixinAsStatic(boeString, nativeFn);
 
     return boeString;
 });

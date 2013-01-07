@@ -10,6 +10,7 @@ define(['./util'], function(util){
 	var FUNCTION_PROTO = global.Function.prototype;
 
 	var fn = {};
+	var nativeFn = {};
 	
 	/**
 	 * @function boeFunction
@@ -174,11 +175,10 @@ define(['./util'], function(util){
      * @param {Object} Context The context to be bond to.
      * @es5
      */
-	!function(){
-	    FUNCTION_PROTO.bind || (fn.bind = util.bind);
-	}();
+	FUNCTION_PROTO.bind ? (fn.bind = util.bind):(nativeFn = FUNCTION_PROTO.bind);
 
 	util.mixinAsStatic(boeFunction, fn);
+	util.mixinAsStatic(boeFunction, nativeFn);
 
 	return boeFunction;
 });
