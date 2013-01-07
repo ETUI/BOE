@@ -1,6 +1,6 @@
 
 
-define(['boe/util', 'boe/Array', 'boe/Function', 'boe/Number', 'boe/Object', 'boe/String'], 
+define(['./boe/util', './boe/Array', './boe/Function', './boe/Number', './boe/Object', './boe/String'], 
     function(util, boeArray, boeFunction, boeNumber, boeObject, boeString){
     var undef, boe;
     var chainableWrapper = function(wrappee){

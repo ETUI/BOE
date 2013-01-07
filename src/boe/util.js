@@ -1,7 +1,7 @@
 define(function(){
 	"use strict";
 	
-	var global = this;
+	var global = (Function("return this"))();
 
 	var OBJECT_PROTO = global.Object.prototype;
 	var ARRAY_PROTO = global.Array.prototype;

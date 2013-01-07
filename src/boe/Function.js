@@ -1,7 +1,7 @@
 /* 
  * Function extensions
  */
-define(['boe/util'], function(util){
+define(['./util'], function(util){
 	"use strict";
 	
 	var global = this;

@@ -1,10 +1,11 @@
 /* 
  * Array extensions
  */
-define(['boe/util'], function(util){
+define(['./util'], function(util){
 	"use strict";
 	var global = this;
 	var ARRAY_PROTO = global.Array.prototype;
+    var UNDEF;
 	
 	var fn = {};
 	
@@ -415,12 +416,45 @@ define(['boe/util'], function(util){
     });
 
     /*
+     * Shuffle current array
+     */
+    boeArray.shuffle = function() {
+        var len = this.length;
+        var l = len;
+        while (l--) {
+            var p = parseInt(Math.random()*len);
+            var t = this[l];
+            this[l] = this[p];
+            this[p] = t;
+        }
+    };
+
+    /*
+     * Pop random item from array
+     * @param popIt default to true, false to not remove it from array
+     */
+
+    boeArray.random = function(popIt){
+        if (popIt === UNDEF){
+            popIt = true;
+        }
+        var idx = Math.random() * this.length;
+        var ret = this[idx];
+
+        if (popIt){
+            this.splice(idx, 1);
+        }
+
+        return ret;
+    };
+
+    /*
      * Returns true if an object is an array, false if it is not.
      * @es5
      */
-    Array.isArray || (boeArray.isArray = function (arg) {
+    boeArray.isArray = function (arg) {
         return Object.prototype.toString.call(arg) == '[object Array]';
-    });
+    };
 
 	util.mixinAsStatic(boeArray, fn);
 
