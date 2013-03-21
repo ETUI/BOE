@@ -175,7 +175,7 @@ define(['./util'], function(util){
      * @param {Object} Context The context to be bond to.
      * @es5
      */
-	FUNCTION_PROTO.bind ? (fn.bind = util.bind):(nativeFn = FUNCTION_PROTO.bind);
+	FUNCTION_PROTO.bind ? (nativeFn.bind = FUNCTION_PROTO.bind):(fn.bind = util.bind);
 
 	util.mixinAsStatic(boeFunction, fn);
 	util.mixinAsStatic(boeFunction, nativeFn);
