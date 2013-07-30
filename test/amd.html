@@ -1,0 +1,21 @@
+<!DOCTYPE HTML>
+<html lang="en-US">
+<head>
+	<meta charset="UTF-8">
+	<title></title>
+</head>
+<body>
+	<script type="text/javascript" src="../components/requirejs/require.js"></script>
+	<script type="text/javascript">
+		require({
+			baseUrl: '../'
+		}, ['boe', 'boe.min'], function (boe, boeMin) {
+			console.log("expected undefined", window.boe);
+			console.log("expected boe", boe);
+			window.boe = boe;
+			console.log("expected boe", boeMin);
+			window.boeMin = boeMin;
+		});
+	</script>
+</body>
+</html>
