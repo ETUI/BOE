@@ -1,6 +1,7 @@
 {
   "name": "boe",
   "version": "1.0.0",
+  "main": "boe.min.js",
   "devDependencies": 
   {
     "requirejs": "~2.1.8",
