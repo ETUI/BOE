@@ -32,6 +32,5 @@ Or rather, you can git clone this repo and use the very specific extension:
 
 		npm install bower -g
 		npm install
-		bower install
 		grunt
 		
