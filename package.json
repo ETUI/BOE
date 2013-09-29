@@ -2,8 +2,7 @@
   "name": "boe",
   "version": "1.0.0",
   "main": "boe.min.js",
-  "devDependencies": 
-  {
+  "devDependencies": {
     "requirejs": "~2.1.8",
     "grunt": "~0.4.1",
     "grunt-bumpup": "~0.2.0",
@@ -11,8 +10,7 @@
     "grunt-contrib-uglify": ">= 0",
     "grunt-tagrelease": "~0.2.0"
   },
-  "scripts":
-  {
+  "scripts": {
     "postinstall": "bower install"
   }
 }
