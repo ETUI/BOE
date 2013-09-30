@@ -416,6 +416,7 @@ define('boe/util',[],function(){
 	var OBJECT_PROTO = global.Object.prototype;
 	var ARRAY_PROTO = global.Array.prototype;
 	var FUNCTION_PROTO = global.Function.prototype;
+	var FUNCTION = 'function';
 
 	var ret = {
 		mixinAsStatic: function(target, fn){
@@ -434,7 +435,7 @@ define('boe/util',[],function(){
 	        var closingIndex = typ.indexOf(']');
 	        return typ.substring(8, closingIndex);
 	    },
-	    mixin: function(target, source){
+	    mixin: function(target, source, map){
 
 		    // in case only source specified
 		    if (source == null){
@@ -447,7 +448,7 @@ define('boe/util',[],function(){
 		            continue;
 		        }
 
-		        target[key] = source[key]
+		        target[key] = ( typeof map == FUNCTION ? map( key, source[key] ) : source[key] );
 		    }
 
 		    return target;
@@ -944,6 +945,7 @@ define('boe/Function',['./util'], function(util){
 	var ARRAY_PROTO = global.Array.prototype;
 	var FUNCTION_PROTO = global.Function.prototype;
 
+	var fnCreator = {};
 	var fn = {};
 	var nativeFn = {};
 	
@@ -960,7 +962,23 @@ define('boe/Function',['./util'], function(util){
 		if (this instanceof boeFunction){
 			func = Function.apply(null, arguments);
 		}
+
+		// create sub methods
+		util.mixin(func, fnCreator, function( key, value ){
+			if ( typeof value != 'function' ) {
+				return value;
+			}
+			// make sure the first argument is always point to the function instance
+			// the reason we don't simply "bind" the member function's "this" to var "me", is because
+			// we want to offer flexibility to user so that they can change the runtime context even when function is memorized or onced.
+			return function() {
+				var args = [ this, func ].concat( ARRAY_PROTO.slice.call(arguments) );
+				return value.call.apply( value, args );
+			};
+		});
+
 		util.mixin(func, fn);
+
 		return func;
 	};
 
@@ -984,8 +1002,8 @@ define('boe/Function',['./util'], function(util){
 			return false;
 		};
 		
-		fn.once = function(){
-			var callback = this;
+		fnCreator.once = function( callback ){
+			
 			if (callback != null && 
 				OBJECT_PROTO.toString.call(callback).toLowerCase() !==
 				'[object function]'){
@@ -1006,12 +1024,12 @@ define('boe/Function',['./util'], function(util){
 	 * @function boeFunction.memorize
 	 **/
 	!function(undef){
-		function node(){
+		function Node(){
 			this.subs = [];
 			this.value = null;
 		};
 		
-		node.prototype.get = function(value){
+		Node.prototype.get = function(value){
 			var subs = this.subs;
 			var l = subs.length;
 			while(l--){
@@ -1023,16 +1041,15 @@ define('boe/Function',['./util'], function(util){
 			return undef;
 		};
 		
-		node.prototype.add = function(value){
+		Node.prototype.add = function(value){
 			var subs = this.subs;
-			var ret = new node;
+			var ret = new Node;
 			ret.value = value;
 			subs[subs.length] = ret;
 			return ret;
 		};
 		
-		fn.memorize = function(){
-			var callback = this;
+		fnCreator.memorize = function( callback ){
 			
 			if (callback != null && 
 				OBJECT_PROTO.toString.call(callback).toLowerCase() !==
@@ -1041,7 +1058,7 @@ define('boe/Function',['./util'], function(util){
 			}
 			
 			if (!callback.__memorizeData__){
-				callback.__memorizeData__ = new node;
+				callback.__memorizeData__ = new Node;
 			}
 			
 			var root = callback.__memorizeData__;
@@ -1112,6 +1129,7 @@ define('boe/Function',['./util'], function(util){
      */
 	FUNCTION_PROTO.bind ? (nativeFn.bind = FUNCTION_PROTO.bind):(fn.bind = util.bind);
 
+	util.mixin(boeFunction, fnCreator);
 	util.mixinAsStatic(boeFunction, fn);
 	util.mixinAsStatic(boeFunction, nativeFn);
 
@@ -1381,6 +1399,26 @@ define('boe/String',['./util'], function(util){
         }
         
         var substr = this.substring(startIndex, endIndex).toUpperCase();
+        // concat and return
+        return this.substring(0, startIndex) + substr + this.substring(endIndex, this.length);
+    };
+
+    /**
+     * @function toLowerCase
+     * Lower case specified substring
+     *
+     * @return {String} Upper cased string
+     */
+    fn.toLowerCase = function(startIndex, endIndex){
+        if (startIndex == null && endIndex == null){
+            return STRING_PROTO.toLowerCase.call(this);
+        }
+        
+        if (endIndex == null){
+            endIndex = this.length;
+        }
+        
+        var substr = this.substring(startIndex, endIndex).toLowerCase();
         // concat and return
         return this.substring(0, startIndex) + substr + this.substring(endIndex, this.length);
     };
