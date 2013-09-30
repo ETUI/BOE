@@ -3,6 +3,13 @@
  */
 define(['./util'], function(util){
 	"use strict";
+
+	var FUNCTION = 'function';
+	var OBJECT = 'object';
+	var UNDEF;
+
+	var FUNCTION_PROTO = Function.prototype;
+
 	var fn = {};
 
 	/**
@@ -72,8 +79,8 @@ define(['./util'], function(util){
 	            this._0_target = obj;
 	            var type;
 	            for(var name in obj){
-	                type = Object.prototype.toString.call(obj[name]).toUpperCase();
-	                if (type.indexOf('FUNCTION') > 0){
+	                type = (typeof obj[name]);
+	                if (type.indexOf(FUNCTION) >= 0){
 	                    this[name] = wrappers.func(obj, name);
 	                }
 	                else{
@@ -101,28 +108,67 @@ define(['./util'], function(util){
 	/**
 	 * @function boeObject.shadow
 	 * Fast clone the object
-	 * that object 'chain-style'.
 	 **/
 	!function(){
 		function Cloner(){
 		}
 
+		var objectCache = [];
+		var traverseMark = '__boeObjectShadow_Traversed';
+
 		fn.shadow = function boeObjectFastClone(deep){
 		    var ret,
 		    	obj = this;
-		    
-		    Cloner.prototype = obj;
-		    
-		    ret = new Cloner();
 
-		    if (deep){
-		    	for(var key in ret){
-			        var cur = ret[key];
-			        if (typeof cur == 'object'){
-			            ret[key] = deepClone(cur);
-			        }
-			    }
+		    if ( traverseMark in this ) {
+		    	// current object is already traversed
+		    	// no need to clone, return the clone directly
+		    	return this[traverseMark];
 		    }
+
+		    // push to stack
+		    objectCache.push( this );
+
+		    if (typeof this == FUNCTION) {
+			    ret = window.eval("true?(" + FUNCTION_PROTO.toString.call(this) + "):false");
+			    this[traverseMark] = ret;
+			    util.mixin( ret, this, ( deep ? function( key, value ){
+			    	if ( key == traverseMark ) {
+			    		return UNDEF;
+			    	}
+			    	if (typeof value == OBJECT || typeof value == FUNCTION) {
+			    		return boeObjectFastClone.call( value, deep );
+			    	}
+			    	else {
+			    		return value;
+			    	}
+			    } : UNDEF ) );
+			    // remove unneccesary copy of traverseMark
+			    delete ret[traverseMark];
+			}
+			else {
+				Cloner.prototype = obj;
+			    ret = new Cloner();
+				this[traverseMark] = ret;
+			    if (deep){
+			    	for(var key in ret){
+			    		if ( key == traverseMark && ret.hasOwnProperty(key) == false ) {
+			    			// if it is the traverseMark on the proto, skip it
+			    			continue;
+			    		}
+				        var cur = ret[key];
+				        if (typeof cur == OBJECT || typeof cur == FUNCTION) {
+				            ret[key] = boeObjectFastClone.call( cur, deep );
+				        }
+				    }
+			    }
+			}
+
+			if ( objectCache.pop( ) != this ) {
+				throw "boe.Object.shadow: stack corrupted."
+			}
+
+			delete this[traverseMark];
 
 		    return ret;
 		}

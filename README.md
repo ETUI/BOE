@@ -56,6 +56,18 @@ Or if feel it is a waste of time to converting the object, static methods are av
 		
 ##API
 
+###util
+
+boe.mixin(target, source, map): Copy members from source to target
+
+* target (optional): target object to mixin to, omittable, if not provided, a new object will be created and returned.
+* source: source object to mixin from
+* map (optional): Must be a function, will be called each time the a member is iterated, the argument will be (memberName, member), and the return value will be copied to target object instead.
+
+boe.type(obj): Return the type of the specified argument
+
+* obj: the object to be determined
+
 ###Array
 
 Array.isArray(obj): Return true if argument is an array
@@ -64,23 +76,23 @@ Array.prototype.shuffle(): Shuffle current array
 
 Array.prototype.random(): Return a random item from current array
 
-Array.prototype.filter(func): shim of the original ecmascript method, see ecmascript spec pls
+Array.prototype.filter(func): Shim of the original ecmascript method, see ecmascript spec pls
 
-Array.prototype.map(func): shim of the original ecmascript method, see ecmascript spec pls
+Array.prototype.map(func): Shim of the original ecmascript method, see ecmascript spec pls
 
-Array.prototype.lastIndexOf(searchItem): shim of the original ecmascript method, see ecmascript spec pls
+Array.prototype.lastIndexOf(searchItem): Shim of the original ecmascript method, see ecmascript spec pls
 
-Array.prototype.indexOf(searchItem): shim of the original ecmascript method, see ecmascript spec pls
+Array.prototype.indexOf(searchItem): Shim of the original ecmascript method, see ecmascript spec pls
 
-Array.prototype.forEach(): shim of the original ecmascript method, see ecmascript spec pls
+Array.prototype.forEach(): Shim of the original ecmascript method, see ecmascript spec pls
 
-Array.prototype.every(): shim of the original ecmascript method, see ecmascript spec pls
+Array.prototype.every(): Shim of the original ecmascript method, see ecmascript spec pls
 
-Array.prototype.some(): shim of the original ecmascript method, see ecmascript spec pls
+Array.prototype.some(): Shim of the original ecmascript method, see ecmascript spec pls
 
-Array.prototype.reduce(): shim of the original ecmascript method, see ecmascript spec pls
+Array.prototype.reduce(): Shim of the original ecmascript method, see ecmascript spec pls
 
-Array.prototype.reduceRight(): shim of the original ecmascript method, see ecmascript spec pls
+Array.prototype.reduceRight(): Shim of the original ecmascript method, see ecmascript spec pls
 
 ###Function
 
@@ -131,7 +143,7 @@ Function.prototype.cage(): simiar to bind(), however it make sure the function w
 		bar2 = foo.bind(window);
 		new bar2();
 
-Function.prototype.bind(): shim of the original ecmascript method, see ecmascript spec pls
+Function.prototype.bind(): Shim of the original ecmascript method, see ecmascript spec pls
 
 ###Number
 
@@ -157,18 +169,22 @@ Object.prototype.chainable(): Convert the object's members to methods that eithe
 		console.log( foo.hello() );
 		console.log( foo.bar().hello() );
 
+Object.prototype.shadow(deepClone): Persudo clone, return a new object which its __proto__ point to the original object.
+
+* deepClone: default to false, true to indicate clone sub objects and functions as well.
+
 ###String
 
-String.prototype.toUpperCase(): similiar to the original toUpperCase(), the only difference is it allow you to specify the a range.
+String.prototype.toUpperCase(): Similar to the original toUpperCase(), the only difference is it allow you to specify the a range.
 
 * startIndex: Start index of upper casing
 * endIndex: End index of upper casing
 
-String.prototype.toLowerCase(): similiar to the original toLowerCase(), the only difference is it allow you to specify the a range.
+String.prototype.toLowerCase(): Similar to the original toLowerCase(), the only difference is it allow you to specify the a range.
 
 * startIndex: Start index of upper casing
 * endIndex: End index of upper casing
 
-String.prototype.format(): similiar to c# String.format(), replace {N}, with the argument on index N.
+String.prototype.format(): Similar to c# String.format(), replace {N}, with the argument on index N.
 
-String.prototype.trim(): shim of the original ecmascript method, see ecmascript spec pls
+String.prototype.trim(): Shim of the original ecmascript method, see ecmascript spec pls

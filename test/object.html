@@ -1,0 +1,172 @@
+<!DOCTYPE HTML>
+<html lang="en-US">
+<head>
+    <meta charset="UTF-8">
+    <title></title>
+    <link rel="stylesheet" href="../components/mocha/mocha.css">
+</head>
+<body>
+    <script type="text/javascript" src="../components/requirejs/require.js"></script>
+    <script type="text/javascript" src="./amd-config.js"></script>
+    <script type="text/javascript">
+        require(['src/boe', 'src/boe/Object' ,'mocha', 'chai'], function (boe, boeObject, mocha, chai) {
+            var expect = chai.expect;
+            mocha.setup('bdd');
+
+            describe( 'boe.Object', function(){
+                it( 'is an function', function(){
+                    expect( boe.Object ).is.a( 'function' );
+                });
+            });
+
+            describe( 'boe/Object', function(){
+                it( 'is an function', function(){
+                    expect( boeObject ).is.a( 'function' );
+                });
+
+                it( 'is same as boe.Object', function(){
+                    expect( boeObject ).equal( boe.Object );
+                });
+            });
+
+            describe( 'boe.Object.chainable', function(){
+                it( 'is an function', function(){
+                    expect( boe.Object.chainable ).is.a( 'function' );
+                });
+
+                it('converts normal member to a member method that either return the object itself or the original value', function(){
+                    var foobar = {
+                        a: 123,
+                        b: function(add){
+                            this.a += add
+                        }
+                    };
+
+                    var boed = boe(foobar);
+                    var chainable = boed.chainable();
+
+                    expect( chainable.a() ).equal( foobar.a );
+                    expect( chainable.b(234).a() ).equal( 123 + 234 );
+                });
+
+                it('works the same when calling its static alias', function(){
+                    var foobar = {
+                        a: 123,
+                        b: function(add){
+                            this.a += add
+                        }
+                    };
+
+                    var chainable = boe.Object.chainable( foobar );
+
+                    expect( chainable.a() ).equal( foobar.a );
+                    expect( chainable.b(234).a() ).equal( 123 + 234 );
+                })
+            });
+
+            describe( 'boe.Object.shadow', function(){
+                it( 'is an function', function(){
+                    expect( boe.Object.shadow ).is.a( 'function' );
+                });
+
+                it( 'creates a new object which has same properties as the original object', function(){
+                    var foobar = {
+                        a: 123,
+                        b: function(add){
+                            this.a += add
+                        }
+                    };
+
+                    var boed = boe(foobar);
+                    var shadowed = boed.shadow();
+
+                    expect( shadowed ).not.equal( foobar );
+                    expect( shadowed.a ).equal( foobar.a );
+                    expect( shadowed.b ).equal( foobar.b );
+
+                })
+
+                it( 'does deep clone if the first argument is true (also make sure function member\'s member is clone as well)', function(){
+                    var func = function(add){
+                        this.a += add
+                    };
+
+                    func.a = 3;
+                    func.b = function(subtract){
+                        this.a -= subtract;
+                    };
+
+                    var foobar = {
+                        a: 123,
+                        b: func
+                    };
+
+                    var boed = boe(foobar);
+                    var shadowed = boed.shadow( true );
+
+                    expect( shadowed ).not.equal( foobar );
+                    expect( shadowed.a ).equal( foobar.a );
+                    expect( shadowed.b ).not.equal( foobar.b );
+                    expect( shadowed.b.a ).equal( foobar.b.a );
+                    expect( shadowed.b.b ).not.equal( foobar.b.b );
+
+                    // the clone function should do the same thing
+                    foobar.b.b(5);
+                    shadowed.b.b(5);
+
+                    expect( shadowed.b.a ).equal( foobar.b.a );
+
+                })
+
+                it('even clone self reference object', function(){
+                    var func = function(){
+
+                    };
+
+                    func.a = func;
+
+                    var foobar = {
+                        a: 1,
+                        b: func,
+                        c: {}
+                    };
+
+                    foobar.c.a = foobar;
+
+                    var boed = boe( foobar );
+                    var shadowed = boed.shadow(true);
+
+                    expect( shadowed ).not.equal( foobar );
+                    expect( shadowed.c.a ).equal( shadowed );
+                    expect( shadowed.c.a ).not.equal( foobar.c.a );
+                    expect( shadowed.b.a ).equal( shadowed.b.a );
+                    expect( shadowed.b.a ).not.equal( foobar.b.a );
+
+                    // make sure the tags are cleaned out
+                    expect( boed ).to.have.not.property( '__boeObjectShadow_Traversed' );
+                })
+
+                it( 'work the same when its the static alias is called', function(){
+                    var foobar = {
+                        a: 123,
+                        b: function(add){
+                            this.a += add
+                        }
+                    };
+
+                    var shadowed = boe.Object.shadow(foobar);
+
+                    expect( shadowed ).not.equal( foobar );
+                    expect( shadowed.a ).equal( foobar.a );
+                    expect( shadowed.b ).equal( foobar.b );
+
+                })
+            });
+
+            mocha.checkLeaks();
+            mocha.run();
+        });
+    </script>
+    <div id="mocha"></div>
+</body>
+</html>

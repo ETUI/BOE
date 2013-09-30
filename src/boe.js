@@ -45,6 +45,8 @@ define(['./boe/util', './boe/Array', './boe/Function', './boe/Number', './boe/Ob
      */
     boe.type = util.type;
 
+    boe.mixin = util.mixin;
+
     boe.Array = boeArray;
 
     boe.Function = boeFunction;
