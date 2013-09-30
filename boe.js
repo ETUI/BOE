@@ -1003,7 +1003,9 @@ define('boe/Function',['./util'], function(util){
 		};
 		
 		fnCreator.once = function( callback ){
-			
+			var callbackArgs = ARRAY_PROTO.slice.call(arguments);
+			callbackArgs[0] = this;
+
 			if (callback != null && 
 				OBJECT_PROTO.toString.call(callback).toLowerCase() !==
 				'[object function]'){
@@ -1015,7 +1017,7 @@ define('boe/Function',['./util'], function(util){
 			
 			calledFuncs.push(callback);
 			
-			return callback.call.apply(callback, arguments);
+			return callback.call.apply(callback, callbackArgs);
 			
 		};
 	}();
@@ -1050,7 +1052,9 @@ define('boe/Function',['./util'], function(util){
 		};
 		
 		fnCreator.memorize = function( callback ){
-			
+			var callbackArgs = ARRAY_PROTO.slice.call(arguments);
+			callbackArgs[0] = this;
+
 			if (callback != null && 
 				OBJECT_PROTO.toString.call(callback).toLowerCase() !==
 				'[object function]'){
@@ -1080,7 +1084,7 @@ define('boe/Function',['./util'], function(util){
 					}
 					
 					// call original function and cache the result
-					cursor.ret = callback.call.apply(callback, arguments);
+					cursor.ret = callback.call.apply(callback, callbackArgs);
 					return cursor.ret;
 				}
 				else{
