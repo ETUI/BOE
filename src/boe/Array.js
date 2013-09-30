@@ -2,32 +2,32 @@
  * Array extensions
  */
 define(['./util'], function(util){
-	"use strict";
-	var global = util.g;
-	var ARRAY_PROTO = global.Array.prototype;
+    "use strict";
+    var global = util.g;
+    var ARRAY_PROTO = global.Array.prototype;
     var UNDEF;
-	
-	var fn = {};
+    
+    var fn = {};
     var nativeFn = {};
-	
-	/**
-	 * @function etui.n.Function
-	 * The function instance builder, copy over all our function helper to
-	 * the function instance
-	 * 
-	 * @usage var foo = function(){};
-	 * etui.n.Function(foo).once();
-	 * 
-	 */
-	var boeArray  = function(arr){
-		if (this instanceof boeArray){
-			arr = Array.apply(null, arguments);
-		}
-		util.mixin(arr, fn);
-		return arr;
-	};
+    
+    /**
+     * @function etui.n.Function
+     * The function instance builder, copy over all our function helper to
+     * the function instance
+     * 
+     * @usage var foo = function(){};
+     * etui.n.Function(foo).once();
+     * 
+     */
+    var boeArray  = function(arr){
+        if (this instanceof boeArray){
+            arr = Array.apply(null, arguments);
+        }
+        util.mixin(arr, fn);
+        return arr;
+    };
 
-	/*
+    /*
      * Creates a new array with all of the elements of this array for which the provided
      * filtering function returns true.
      * @es5
@@ -457,8 +457,8 @@ define(['./util'], function(util){
         return Object.prototype.toString.call(arg) == '[object Array]';
     };
 
-	util.mixinAsStatic(boeArray, fn);
+    util.mixinAsStatic(boeArray, fn);
     util.mixinAsStatic(boeArray, nativeFn);
 
-	return boeArray;
+    return boeArray;
 });
