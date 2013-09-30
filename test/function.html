@@ -79,6 +79,19 @@
 
                 });
 
+                it( ' is allowed to change the running context', function(){
+                    var foobar = {};
+
+                    var func = function( arg1 ){ 
+                        expect( arg1 ).equal( 1 );
+                        expect( this ).equal( foobar );
+                    };
+
+                    var boed = boe( func );
+                    
+                    boed.once.call( foobar, 1);
+                })
+
                 it('\'s static method should work the same way', function(){
                     var called = 0;
                     var result;
@@ -155,6 +168,42 @@
 
                 });
 
+                it( ' is allowed to change the running context', function(){
+                    var foobar = {};
+
+                    var func = function( arg1 ){ 
+                        expect( arg1 ).equal( 1 );
+                        expect( this ).equal( foobar );
+                    };
+
+                    var boed = boe( func );
+                    
+                    boed.memorize.call( foobar, 1);
+                    boed.memorize.call( foobar, 1 );
+                })
+
+                it( 'caches input and the corresponding output and hence make fab() run faster', function(){
+                    var fabTarget = 30;
+                    var tmp, boeFab;   
+                    var normalTimeSpan = 0;
+                    var memorizedTimeSpan = 0;
+
+                    tmp = Date.now();
+                    fab( fabTarget, fab ) // this line will take a while to finish
+                    normalTimeSpan = Date.now() - tmp;
+
+                    console.log('normalTimeSpan', normalTimeSpan)
+
+                    tmp = Date.now();
+                    boeFab = boe(fab);
+                    boeFab.memorize( fabTarget, boeFab.memorize );
+                    memorizedTimeSpan = Date.now() - tmp;
+
+                    console.log('memorizedTimeSpan', memorizedTimeSpan)
+
+                    expect( memorizedTimeSpan ).to.be.below( normalTimeSpan );
+                }); 
+
                 it( '\'s static method work the same way as member member, the only diff is it take 1st arg as the original function', function(){
                     var called = 0;
                     var result;
@@ -182,30 +231,7 @@
                     // if the argument changed, the original function should be called again
                     expect( called ).equal( 2 );
                     expect( result ).equal( 4 );
-                } )
-
-                it( 'caches input and the corresponding output and hence make fab() run faster', function(){
-                    var fabTarget = 30;
-                    var tmp, boeFab;   
-                    var normalTimeSpan = 0;
-                    var memorizedTimeSpan = 0;
-
-                    tmp = Date.now();
-                    fab( fabTarget, fab ) // this line will take a while to finish
-                    normalTimeSpan = Date.now() - tmp;
-
-                    console.log('normalTimeSpan', normalTimeSpan)
-
-                    tmp = Date.now();
-                    boeFab = boe(fab);
-                    boeFab.memorize( fabTarget, boeFab.memorize );
-                    memorizedTimeSpan = Date.now() - tmp;
-
-                    console.log('memorizedTimeSpan', memorizedTimeSpan)
-
-                    expect( memorizedTimeSpan ).to.be.below( normalTimeSpan );
-
-                });                
+                } )           
             });
 
             describe( 'boe.Function.cage', function(){
