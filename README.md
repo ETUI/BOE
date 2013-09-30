@@ -88,26 +88,44 @@ Function.prototype.once(): redirect the call to the original function if once() 
 
 Function.prototype.memorize(): if the inputs do not hit the cache, redirect the call to the original function, and then cache the input and output. Below is an example of using it.
 
-		function fab(index){
-			if (index < 0){
-				throw "error";
-			}
-			else if (index == 0){
-				return 1;
-			}  
-			else if (index == 1){
-				return 2;
-			}
-			return fab(index - 2) + fab(index - 1);
-		}
+		function fab(index, self){
+	        if (index < 0){
+	            throw "error";
+	        }
+	        else if (index == 0){
+	            return 1;
+	        }  
+	        else if (index == 1){
+	            return 2;
+	        }
+	        return self( index - 2, self ) + self( index - 1, self );
+	    }
 		
-		fab(100) // this line will take a year to finish
-		boe(fab).memorize(100) // this will be much much faster
+		var tmp, boeFab;   
+        var normalTimeSpan = 0;
+        var memorizedTimeSpan = 0;
+
+        tmp = Date.now();
+        fab( 35, fab ) // this line will take a while to finish
+        normalTimeSpan = Date.now() - tmp;
+
+        console.log('normalTimeSpan', normalTimeSpan)
+
+        tmp = Date.now();
+        boeFab = boe(fab);
+        boeFab.memorize( 35, boeFab.memorize );
+        memorizedTimeSpan = Date.now() - tmp;
+
+        console.log('memorizedTimeSpan', memorizedTimeSpan)
+
+        expect( memorizedTimeSpan ).to.be.below( normalTimeSpan );
 		
 Function.prototype.cage(): simiar to bind(), however it make sure the function was ran under certain context even it is 'newed', try below code with bind and cage to find out difference:
 
 		function foo(){console.log(this)}
 		
+		foo = boe(foo);
+
 		bar = foo.cage(window);
 		new bar();
 		bar2 = foo.bind(window);
@@ -126,7 +144,7 @@ Number.prototype.toCurrency(fixedLength, formatFloat): Return a formatted string
 
 Object.prototype.chainable(): Convert the object's members to methods that either return the original value or return the object itself.
 
-		foo = {
+		var foo = {
 			hello: 1,
 			world: 2,
 			bar: function(){
@@ -137,11 +155,16 @@ Object.prototype.chainable(): Convert the object's members to methods that eithe
 		foo = boe(foo).chainable();
 		
 		console.log( foo.hello() );
-		console.log( foo.bar().hello() )
+		console.log( foo.bar().hello() );
 
 ###String
 
 String.prototype.toUpperCase(): similiar to the original toUpperCase(), the only difference is it allow you to specify the a range.
+
+* startIndex: Start index of upper casing
+* endIndex: End index of upper casing
+
+String.prototype.toLowerCase(): similiar to the original toLowerCase(), the only difference is it allow you to specify the a range.
 
 * startIndex: Start index of upper casing
 * endIndex: End index of upper casing

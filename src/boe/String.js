@@ -44,6 +44,26 @@ define(['./util'], function(util){
         // concat and return
         return this.substring(0, startIndex) + substr + this.substring(endIndex, this.length);
     };
+
+    /**
+     * @function toLowerCase
+     * Lower case specified substring
+     *
+     * @return {String} Upper cased string
+     */
+    fn.toLowerCase = function(startIndex, endIndex){
+        if (startIndex == null && endIndex == null){
+            return STRING_PROTO.toLowerCase.call(this);
+        }
+        
+        if (endIndex == null){
+            endIndex = this.length;
+        }
+        
+        var substr = this.substring(startIndex, endIndex).toLowerCase();
+        // concat and return
+        return this.substring(0, startIndex) + substr + this.substring(endIndex, this.length);
+    };
     
     /*
      * similar to the String.Format function in C#

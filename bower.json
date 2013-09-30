@@ -3,6 +3,8 @@
   "version": "1.0.0",
   "devDependencies": {
     "almond": "~0.2.5",
-    "requirejs": "~2.1.8"
+    "requirejs": "~2.1.8",
+    "chai": "~1.8.0",
+    "mocha": "~1.13.0"
   }
 }

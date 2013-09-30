@@ -6,6 +6,7 @@ define(function(){
 	var OBJECT_PROTO = global.Object.prototype;
 	var ARRAY_PROTO = global.Array.prototype;
 	var FUNCTION_PROTO = global.Function.prototype;
+	var FUNCTION = 'function';
 
 	var ret = {
 		mixinAsStatic: function(target, fn){
@@ -24,7 +25,7 @@ define(function(){
 	        var closingIndex = typ.indexOf(']');
 	        return typ.substring(8, closingIndex);
 	    },
-	    mixin: function(target, source){
+	    mixin: function(target, source, map){
 
 		    // in case only source specified
 		    if (source == null){
@@ -37,7 +38,7 @@ define(function(){
 		            continue;
 		        }
 
-		        target[key] = source[key]
+		        target[key] = ( typeof map == FUNCTION ? map( key, source[key] ) : source[key] );
 		    }
 
 		    return target;

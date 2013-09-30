@@ -1,0 +1,219 @@
+<!DOCTYPE HTML>
+<html lang="en-US">
+<head>
+    <meta charset="UTF-8">
+    <title></title>
+    <link rel="stylesheet" href="../components/mocha/mocha.css">
+</head>
+<body>
+    <script type="text/javascript" src="../components/requirejs/require.js"></script>
+    <script type="text/javascript" src="./amd-config.js"></script>
+    <script type="text/javascript">
+        require(['src/boe', 'src/boe/Function' ,'mocha', 'chai'], function (boe, boeFunction, mocha, chai) {
+            var expect = chai.expect;
+            mocha.setup('bdd');
+
+            function fab(index, self){
+                if (index < 0){
+                    throw "error";
+                }
+                else if (index == 0){
+                    return 1;
+                }  
+                else if (index == 1){
+                    return 2;
+                }
+                return self( index - 2, self ) + self( index - 1, self );
+            }
+
+            describe( 'boe.Function', function(){
+                it( 'is an function', function(){
+                    expect( boe.Function ).is.a( 'function' );
+                });
+            });
+
+            describe( 'boe/Function', function(){
+                it( 'is an function', function(){
+                    expect( boeFunction ).is.a( 'function' );
+                });
+            });
+
+            describe( 'boe.Function.once', function(){
+                it( 'is an function', function(){
+                    expect( boe.Function.once ).is.a( 'function' );
+                });
+
+                it('makes sure original function only get called once', function(){
+                    var called = 0;
+                    var result;
+
+                    var func = function( arg1 ){ 
+                        called++; 
+                        return called + arg1; 
+                    };
+
+                    var boed = boe( func );
+
+                    expect( called ).equal( 0 );
+
+                    result = boed.once( 1 );
+
+                    expect( called ).equal( 1 );
+                    expect( result ).equal( 2 );
+
+                    result = boed.once( 2 );
+
+                    expect( called ).equal( 1 );
+                    // current design is we don't cache the result
+                    expect( result ).equal( null );
+
+                    result = boed( 3 );
+
+                    expect( called ).equal( 2 );
+                    // current design is we don't cache the result
+                    expect( result ).equal( 5 );
+
+                });
+
+                it('\'s static method should work the same way', function(){
+                    var called = 0;
+                    var result;
+
+                    var func = function( arg1 ){ 
+                        called++; 
+                        return called + arg1; 
+                    };
+
+                    expect( called ).equal( 0 );
+
+                    result = boe.Function.once( func, 1 );
+
+                    expect( called ).equal( 1 );
+                    expect( result ).equal( 2 );
+
+                    result = boe.Function.once( func, 1 );
+
+                    expect( called ).equal( 1 );
+                    // current design is we don't cache the result
+                    expect( result ).equal( null );
+
+                });
+            });
+
+            describe( 'boe.Function.memorize', function(){
+                it( 'is an function', function(){
+
+                    expect( boe.Function.memorize ).is.a( 'function' );
+
+                });
+
+                it( 'is also can be an member function', function(){
+                    var boed = boe( function(){ } );
+                    expect( boed.memorize ).is.a( 'function' );
+                });
+
+                it( 'caches input and the corresponding output, so it does not call into original function the 2nd time', function(){
+                    var called = 0;
+                    var result;
+
+                    var func = function( arg1 ){ 
+                        called++; 
+                        return called + arg1; 
+                    };
+
+                    var boed = boe( func );
+
+                    expect( called ).equal( 0 );
+
+                    result = boed.memorize( 1 );
+
+                    expect( called ).equal( 1 );
+                    expect( result ).equal( 2 );
+
+                    result = boed.memorize( 1 );
+
+                    // no matter how many times memorize() is called, original function should not be called
+                    // and the result should be same as previous
+                    expect( called ).equal( 1 );
+                    expect( result ).equal( 2 );
+
+                    result = boed( 1 );
+                    
+                    // the original method should not be affected
+                    expect( called ).equal( 2 );
+                    expect( result ).equal( 3 );
+
+                    // if the argument changed, the original function should be called again
+                    result = boed.memorize( 2 );
+
+                    expect( called ).equal( 3 );
+                    expect( result ).equal( 5 );
+
+                });
+
+                it( '\'s static method work the same way as member member, the only diff is it take 1st arg as the original function', function(){
+                    var called = 0;
+                    var result;
+
+                    var func = function( arg1 ){ 
+                        called++; 
+                        return called + arg1; 
+                    };
+
+                    expect( called ).equal( 0 );
+
+                    result = boe.Function.memorize( func, 1 );
+
+                    expect( called ).equal( 1 );
+                    expect( result ).equal( 2 );
+
+                    result = boe.Function.memorize( func, 1 );
+
+                    // no matter how many times memorize() is called
+                    expect( called ).equal( 1 );
+                    expect( result ).equal( 2 );
+
+                    result = boe.Function.memorize( func, 2 );
+
+                    // if the argument changed, the original function should be called again
+                    expect( called ).equal( 2 );
+                    expect( result ).equal( 4 );
+                } )
+
+                it( 'caches input and the corresponding output and hence make fab() run faster', function(){
+                    var fabTarget = 30;
+                    var tmp, boeFab;   
+                    var normalTimeSpan = 0;
+                    var memorizedTimeSpan = 0;
+
+                    tmp = Date.now();
+                    fab( fabTarget, fab ) // this line will take a while to finish
+                    normalTimeSpan = Date.now() - tmp;
+
+                    console.log('normalTimeSpan', normalTimeSpan)
+
+                    tmp = Date.now();
+                    boeFab = boe(fab);
+                    boeFab.memorize( fabTarget, boeFab.memorize );
+                    memorizedTimeSpan = Date.now() - tmp;
+
+                    console.log('memorizedTimeSpan', memorizedTimeSpan)
+
+                    expect( memorizedTimeSpan ).to.be.below( normalTimeSpan );
+
+                });                
+            });
+
+            describe( 'boe.Function.cage', function(){
+                it( 'is an function', function(){
+                    expect( boe.Function.cage ).is.a( 'function' );
+                });
+            });
+
+            mocha.checkLeaks();
+            mocha.run();
+        });
+    </script>
+    <div id="mocha"></div>
+</body>
+</html>
