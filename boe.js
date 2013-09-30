@@ -409,96 +409,96 @@ var requirejs, require, define;
 define("../components/almond/almond", function(){});
 
 define('boe/util',[],function(){
-	
-	
-	var global = (Function("return this"))();
+    
+    
+    var global = (Function("return this"))();
 
-	var OBJECT_PROTO = global.Object.prototype;
-	var ARRAY_PROTO = global.Array.prototype;
-	var FUNCTION_PROTO = global.Function.prototype;
-	var FUNCTION = 'function';
+    var OBJECT_PROTO = global.Object.prototype;
+    var ARRAY_PROTO = global.Array.prototype;
+    var FUNCTION_PROTO = global.Function.prototype;
+    var FUNCTION = 'function';
 
-	var ret = {
-		mixinAsStatic: function(target, fn){
-	        for(var key in fn){
-	            if (!fn.hasOwnProperty(key)){
-	                continue;
-	            }
+    var ret = {
+        mixinAsStatic: function(target, fn){
+            for(var key in fn){
+                if (!fn.hasOwnProperty(key)){
+                    continue;
+                }
 
-	            target[key] = ret.bind.call(FUNCTION_PROTO.call, fn[key]);
-	        }
+                target[key] = ret.bind.call(FUNCTION_PROTO.call, fn[key]);
+            }
 
-	        return target;
-	    },
-	    type: function(obj){
-	        var typ = OBJECT_PROTO.toString.call(obj);
-	        var closingIndex = typ.indexOf(']');
-	        return typ.substring(8, closingIndex);
-	    },
-	    mixin: function(target, source, map){
+            return target;
+        },
+        type: function(obj){
+            var typ = OBJECT_PROTO.toString.call(obj);
+            var closingIndex = typ.indexOf(']');
+            return typ.substring(8, closingIndex);
+        },
+        mixin: function(target, source, map){
 
-		    // in case only source specified
-		    if (source == null){
-		        source = target;
-		        target= {};
-		    }
+            // in case only source specified
+            if (source == null){
+                source = target;
+                target= {};
+            }
 
-		    for(var key in source){
-		        if (!source.hasOwnProperty(key)){
-		            continue;
-		        }
+            for(var key in source){
+                if (!source.hasOwnProperty(key)){
+                    continue;
+                }
 
-		        target[key] = ( typeof map == FUNCTION ? map( key, source[key] ) : source[key] );
-		    }
+                target[key] = ( typeof map == FUNCTION ? map( key, source[key] ) : source[key] );
+            }
 
-		    return target;
-		},
-		bind: function(context) {
-	        var slice = ARRAY_PROTO.slice;
-	        var __method = this, args = slice.call(arguments);
-	        args.shift();
-	        return function wrapper() {
-	            if (this instanceof wrapper){
-	                context = this;
-	            }
-	            return __method.apply(context, args.concat(slice.call(arguments)));
-	        };
-	    },
-	    g: global
-	};
+            return target;
+        },
+        bind: function(context) {
+            var slice = ARRAY_PROTO.slice;
+            var __method = this, args = slice.call(arguments);
+            args.shift();
+            return function wrapper() {
+                if (this instanceof wrapper){
+                    context = this;
+                }
+                return __method.apply(context, args.concat(slice.call(arguments)));
+            };
+        },
+        g: global
+    };
 
-	return ret;
+    return ret;
 });
 /* 
  * Array extensions
  */
 define('boe/Array',['./util'], function(util){
-	
-	var global = util.g;
-	var ARRAY_PROTO = global.Array.prototype;
+    
+    var global = util.g;
+    var ARRAY_PROTO = global.Array.prototype;
     var UNDEF;
-	
-	var fn = {};
+    
+    var fn = {};
     var nativeFn = {};
-	
-	/**
-	 * @function etui.n.Function
-	 * The function instance builder, copy over all our function helper to
-	 * the function instance
-	 * 
-	 * @usage var foo = function(){};
-	 * etui.n.Function(foo).once();
-	 * 
-	 */
-	var boeArray  = function(arr){
-		if (this instanceof boeArray){
-			arr = Array.apply(null, arguments);
-		}
-		util.mixin(arr, fn);
-		return arr;
-	};
+    
+    /**
+     * @function etui.n.Function
+     * The function instance builder, copy over all our function helper to
+     * the function instance
+     * 
+     * @usage var foo = function(){};
+     * etui.n.Function(foo).once();
+     * 
+     */
+    var boeArray  = function(arr){
+        if (this instanceof boeArray){
+            arr = Array.apply(null, arguments);
+        }
+        util.mixin(arr, fn);
+        return arr;
+    };
 
-	/*
+    /*
      * Creates a new array with all of the elements of this array for which the provided
      * filtering function returns true.
      * @es5
@@ -928,202 +928,202 @@ define('boe/Array',['./util'], function(util){
         return Object.prototype.toString.call(arg) == '[object Array]';
     };
 
-	util.mixinAsStatic(boeArray, fn);
+    util.mixinAsStatic(boeArray, fn);
     util.mixinAsStatic(boeArray, nativeFn);
 
-	return boeArray;
+    return boeArray;
 });
 
 /* 
  * Function extensions
  */
 define('boe/Function',['./util'], function(util){
-	
-	
-	var global = util.g;
-	var OBJECT_PROTO = global.Object.prototype;
-	var ARRAY_PROTO = global.Array.prototype;
-	var FUNCTION_PROTO = global.Function.prototype;
+    
+    
+    var global = util.g;
+    var OBJECT_PROTO = global.Object.prototype;
+    var ARRAY_PROTO = global.Array.prototype;
+    var FUNCTION_PROTO = global.Function.prototype;
 
-	var fnCreator = {};
-	var fn = {};
-	var nativeFn = {};
-	
-	/**
-	 * @function boeFunction
-	 * The function instance builder, copy over all our function helper to
-	 * the function instance
-	 * 
-	 * @usage var foo = function(){};
-	 * boeFunction(foo).once();
-	 * 
-	 */
-	var boeFunction = function(func){
-		if (this instanceof boeFunction){
-			func = Function.apply(null, arguments);
-		}
+    var fnCreator = {};
+    var fn = {};
+    var nativeFn = {};
+    
+    /**
+     * @function boeFunction
+     * The function instance builder, copy over all our function helper to
+     * the function instance
+     * 
+     * @usage var foo = function(){};
+     * boeFunction(foo).once();
+     * 
+     */
+    var boeFunction = function(func){
+        if (this instanceof boeFunction){
+            func = Function.apply(null, arguments);
+        }
 
-		// create sub methods
-		util.mixin(func, fnCreator, function( key, value ){
-			if ( typeof value != 'function' ) {
-				return value;
-			}
-			// make sure the first argument is always point to the function instance
-			// the reason we don't simply "bind" the member function's "this" to var "me", is because
-			// we want to offer flexibility to user so that they can change the runtime context even when function is memorized or onced.
-			return function() {
-				var args = [ this, func ].concat( ARRAY_PROTO.slice.call(arguments) );
-				return value.call.apply( value, args );
-			};
-		});
+        // create sub methods
+        util.mixin(func, fnCreator, function( key, value ){
+            if ( typeof value != 'function' ) {
+                return value;
+            }
+            // make sure the first argument is always point to the function instance
+            // the reason we don't simply "bind" the member function's "this" to var "me", is because
+            // we want to offer flexibility to user so that they can change the runtime context even when function is memorized or onced.
+            return function() {
+                var args = [ this, func ].concat( ARRAY_PROTO.slice.call(arguments) );
+                return value.call.apply( value, args );
+            };
+        });
 
-		util.mixin(func, fn);
+        util.mixin(func, fn);
 
-		return func;
-	};
+        return func;
+    };
 
-	/**
-	 * @function boeFunction.once
-	 * Do nothing if current function already executed once.
-	 * @param context the context to run the function
-	 * @param arguments the arguments to be passed.
-	 **/
-	!function(){
-		var calledFuncs = [];
-		
-		function has(callback){
-			var l = calledFuncs.length;
-			while(l--){
-				if (calledFuncs[l] === callback){
-					return true;
-				}
-			}
-			
-			return false;
-		};
-		
-		fnCreator.once = function( callback ){
-			var callbackArgs = ARRAY_PROTO.slice.call(arguments);
-			callbackArgs[0] = this;
+    /**
+     * @function boeFunction.once
+     * Do nothing if current function already executed once.
+     * @param context the context to run the function
+     * @param arguments the arguments to be passed.
+     **/
+    !function(){
+        var calledFuncs = [];
+        
+        function has(callback){
+            var l = calledFuncs.length;
+            while(l--){
+                if (calledFuncs[l] === callback){
+                    return true;
+                }
+            }
+            
+            return false;
+        };
+        
+        fnCreator.once = function( callback ){
+            var callbackArgs = ARRAY_PROTO.slice.call(arguments);
+            callbackArgs[0] = this;
 
-			if (callback != null && 
-				OBJECT_PROTO.toString.call(callback).toLowerCase() !==
-				'[object function]'){
-				throw new Error('boeFunction.once.ownerNotFunction');
-			}
-			if (has(callback)){
-				return null;
-			}
-			
-			calledFuncs.push(callback);
-			
-			return callback.call.apply(callback, callbackArgs);
-			
-		};
-	}();
-	
-	/**
-	 * @function boeFunction.memorize
-	 **/
-	!function(undef){
-		function Node(){
-			this.subs = [];
-			this.value = null;
-		};
-		
-		Node.prototype.get = function(value){
-			var subs = this.subs;
-			var l = subs.length;
-			while(l--){
-				if (subs[l].value === value){
-					return subs[l];
-				}
-			}
-			
-			return undef;
-		};
-		
-		Node.prototype.add = function(value){
-			var subs = this.subs;
-			var ret = new Node;
-			ret.value = value;
-			subs[subs.length] = ret;
-			return ret;
-		};
-		
-		fnCreator.memorize = function( callback ){
-			var callbackArgs = ARRAY_PROTO.slice.call(arguments);
-			callbackArgs[0] = this;
+            if (callback != null && 
+                OBJECT_PROTO.toString.call(callback).toLowerCase() !==
+                '[object function]'){
+                throw new Error('boeFunction.once.ownerNotFunction');
+            }
+            if (has(callback)){
+                return null;
+            }
+            
+            calledFuncs.push(callback);
+            
+            return callback.call.apply(callback, callbackArgs);
+            
+        };
+    }();
+    
+    /**
+     * @function boeFunction.memorize
+     **/
+    !function(undef){
+        function Node(){
+            this.subs = [];
+            this.value = null;
+        };
+        
+        Node.prototype.get = function(value){
+            var subs = this.subs;
+            var l = subs.length;
+            while(l--){
+                if (subs[l].value === value){
+                    return subs[l];
+                }
+            }
+            
+            return undef;
+        };
+        
+        Node.prototype.add = function(value){
+            var subs = this.subs;
+            var ret = new Node;
+            ret.value = value;
+            subs[subs.length] = ret;
+            return ret;
+        };
+        
+        fnCreator.memorize = function( callback ){
+            var callbackArgs = ARRAY_PROTO.slice.call(arguments);
+            callbackArgs[0] = this;
 
-			if (callback != null && 
-				OBJECT_PROTO.toString.call(callback).toLowerCase() !==
-				'[object function]'){
-				throw new Error('boeFunction.memorize.ownerNotFunction');
-			}
-			
-			if (!callback.__memorizeData__){
-				callback.__memorizeData__ = new Node;
-			}
-			
-			var root = callback.__memorizeData__;
-			var i, l, cursor = root;
-			
-			var ret = null;
-			
-			
-			// cache it and then return it
-			for(i = 0, l= arguments.length; i < l; i++){
-				var arg = arguments[i],
-					argNode = cursor.get(arg);
-					
-				if (argNode === undef){
-					
-					// cache the arguments to the tree
-					for(;i < l; i++){
-						cursor = cursor.add(arguments[i]);
-					}
-					
-					// call original function and cache the result
-					cursor.ret = callback.call.apply(callback, callbackArgs);
-					return cursor.ret;
-				}
-				else{
-					cursor = argNode;
-				}
-				
-			};
-			
-			ret = cursor.ret;
-			
-			return ret;
-			
-		};
-	}();
+            if (callback != null && 
+                OBJECT_PROTO.toString.call(callback).toLowerCase() !==
+                '[object function]'){
+                throw new Error('boeFunction.memorize.ownerNotFunction');
+            }
+            
+            if (!callback.__memorizeData__){
+                callback.__memorizeData__ = new Node;
+            }
+            
+            var root = callback.__memorizeData__;
+            var i, l, cursor = root;
+            
+            var ret = null;
+            
+            
+            // cache it and then return it
+            for(i = 0, l= arguments.length; i < l; i++){
+                var arg = arguments[i],
+                    argNode = cursor.get(arg);
+                    
+                if (argNode === undef){
+                    
+                    // cache the arguments to the tree
+                    for(;i < l; i++){
+                        cursor = cursor.add(arguments[i]);
+                    }
+                    
+                    // call original function and cache the result
+                    cursor.ret = callback.call.apply(callback, callbackArgs);
+                    return cursor.ret;
+                }
+                else{
+                    cursor = argNode;
+                }
+                
+            };
+            
+            ret = cursor.ret;
+            
+            return ret;
+            
+        };
+    }();
 
-	/**
-	 * @function boeFunction.cage
+    /**
+     * @function boeFunction.cage
 
-	 * make sure the function was ran under certain context even it is 'newed'
-	 * try below code with bind and cage:
+     * make sure the function was ran under certain context even it is 'newed'
+     * try below code with bind and cage:
 
-	 * function foo(){console.log(this)}
-	 * bar = foo.cage(window);
-	 * new bar();
-	 * bar2 = foo.bind(window);
-	 * new bar2();
-	 **/
-	!function(){
-		fn.cage = function(context) {
-	        var slice = ARRAY_PROTO.slice;
-	        var __method = this, args = slice.call(arguments);
-	        args.shift();
-	        return function() {
-	            return __method.apply(context, args.concat(slice.call(arguments)));
-	        };
-	    };
-	}();
+     * function foo(){console.log(this)}
+     * bar = foo.cage(window);
+     * new bar();
+     * bar2 = foo.bind(window);
+     * new bar2();
+     **/
+    !function(){
+        fn.cage = function(context) {
+            var slice = ARRAY_PROTO.slice;
+            var __method = this, args = slice.call(arguments);
+            args.shift();
+            return function() {
+                return __method.apply(context, args.concat(slice.call(arguments)));
+            };
+        };
+    }();
 
-	/**
+    /**
      * Binds function execution context to specified object, locks its execution scope to an object.
      *
      * @member Function.prototype
@@ -1131,13 +1131,13 @@ define('boe/Function',['./util'], function(util){
      * @param {Object} Context The context to be bond to.
      * @es5
      */
-	FUNCTION_PROTO.bind ? (nativeFn.bind = FUNCTION_PROTO.bind):(fn.bind = util.bind);
+    FUNCTION_PROTO.bind ? (nativeFn.bind = FUNCTION_PROTO.bind):(fn.bind = util.bind);
 
-	util.mixin(boeFunction, fnCreator);
-	util.mixinAsStatic(boeFunction, fn);
-	util.mixinAsStatic(boeFunction, nativeFn);
+    util.mixin(boeFunction, fnCreator);
+    util.mixinAsStatic(boeFunction, fn);
+    util.mixinAsStatic(boeFunction, nativeFn);
 
-	return boeFunction;
+    return boeFunction;
 });
 
 
@@ -1145,24 +1145,24 @@ define('boe/Function',['./util'], function(util){
  * Number extensions
  */
 define('boe/Number',['./util'], function(util){
-	
-	var fn = {};
+    
+    var fn = {};
 
-	/**
-	 * @function boeNumber
-	 * The Number object builder, copy over all our number helper to
-	 * the instance
-	 * 
-	 * @usage var foo = 123;
-	 * boeNumber(foo).toCurrency();
-	 * 
-	 */
-	var boeNumber = function(num){
-		num = new Number(num);
-		util.mixin(num, fn);
-		return num;
-	};
-	
+    /**
+     * @function boeNumber
+     * The Number object builder, copy over all our number helper to
+     * the instance
+     * 
+     * @usage var foo = 123;
+     * boeNumber(foo).toCurrency();
+     * 
+     */
+    var boeNumber = function(num){
+        num = new Number(num);
+        util.mixin(num, fn);
+        return num;
+    };
+    
     /**
      * @function toCurrency
      * Return a string that with commas seperated every 3 char.
@@ -1174,47 +1174,47 @@ define('boe/Number',['./util'], function(util){
         var floatIndex = formated.indexOf('.');
         var chars = formated.split('');
         var result = [];
-		var delimiterIndex, len = chars.length, fixedCounter=0, tmpChar;
-		
-		if (floatIndex < 0){
-			// means the dot actually is at the end of the string
-			floatIndex = len;
-		}
-		
+        var delimiterIndex, len = chars.length, fixedCounter=0, tmpChar;
+        
+        if (floatIndex < 0){
+            // means the dot actually is at the end of the string
+            floatIndex = len;
+        }
+        
         for(var i = 0; i < len; i++){
-			// don't put commas to the end
-			if (i > len - 1 || 
-				(fixedLength != null && i > fixedLength + floatIndex)
-				) continue;
-				
-			tmpChar = chars[i];
-			if (i < floatIndex - 1 ){
-				delimiterIndex = (floatIndex - 1 - i);
-				if (delimiterIndex != 0 && delimiterIndex % 3 == 0){
-					tmpChar = chars[i] + ',';
-				}
+            // don't put commas to the end
+            if (i > len - 1 || 
+                (fixedLength != null && i > fixedLength + floatIndex)
+                ) continue;
+                
+            tmpChar = chars[i];
+            if (i < floatIndex - 1 ){
+                delimiterIndex = (floatIndex - 1 - i);
+                if (delimiterIndex != 0 && delimiterIndex % 3 == 0){
+                    tmpChar = chars[i] + ',';
+                }
 
             }
             else if (formatFloat && i > floatIndex - 1){
-				
-				if (fixedCounter++ <= fixedLength){
-					delimiterIndex = (i - floatIndex);
-					if (delimiterIndex != 0 && delimiterIndex % 3 == 0 &&
-						// check it is not the last char
-						i < fixedLength + floatIndex){
-						tmpChar = chars[i] + ',';
-					}
-				}
+                
+                if (fixedCounter++ <= fixedLength){
+                    delimiterIndex = (i - floatIndex);
+                    if (delimiterIndex != 0 && delimiterIndex % 3 == 0 &&
+                        // check it is not the last char
+                        i < fixedLength + floatIndex){
+                        tmpChar = chars[i] + ',';
+                    }
+                }
 
-			}
+            }
 
-			result.push(tmpChar);
+            result.push(tmpChar);
         }
         
         if (result[result.length - 1] == '.' ) {
-			result.pop();
-		}
-		
+            result.pop();
+        }
+        
         formated = result.join('');
         
         return formated;
@@ -1229,181 +1229,239 @@ define('boe/Number',['./util'], function(util){
  * Object extensions
  */
 define('boe/Object',['./util'], function(util){
-	
+    
 
-	var FUNCTION = 'function';
-	var OBJECT = 'object';
-	var UNDEF;
+    var FUNCTION = 'function';
+    var OBJECT = 'object';
+    var UNDEF;
 
-	var FUNCTION_PROTO = Function.prototype;
+    var FUNCTION_PROTO = Function.prototype;
 
-	var fn = {};
+    var fn = {};
 
-	/**
-	 * @function boeObject
-	 * The object builder, copy over all our object helper to
-	 * the instance
-	 * 
-	 * @usage var foo = {};
-	 * boeObject(foo).chainable();
-	 * 
-	 */
-	var boeObject = function(obj){
-		if (this instanceof boeObject){
-			obj = new Object(obj, arguments[1]);
-		}
-		util.mixin(obj, fn);
-		return obj;
-	};
+    /**
+     * @function boeObject
+     * The object builder, copy over all our object helper to
+     * the instance
+     * 
+     * @usage var foo = {};
+     * boeObject(foo).chainable();
+     * 
+     */
+    var boeObject = function(obj){
+        if (this instanceof boeObject){
+            obj = new Object(obj, arguments[1]);
+        }
+        util.mixin(obj, fn);
+        return obj;
+    };
 
-	/**
-	 * @function boeObject.chainable
-	 * Convert members of any object to return object itself so we can use
-	 * that object 'chain-style'.
-	 **/
-	!function(undef){
+    /**
+     * @function boeObject.chainable
+     * Convert members of any object to return object itself so we can use
+     * that object 'chain-style'.
+     **/
+    !function(undef){
 
-	    var chn = function(){
-	        return new wrapperCtor(this);
-	    };
-	    
-	   
-	    var wrappers = {
-	        func: function(context, propName){
-	            return function(){
-	                var ret = context[propName].apply(context, arguments);
-	                    
-	                // if no return value, return myself
-	                if (ret === undef){
-	                    return this;
-	                }
-	                return ret;
-	            };
-	        },
-	        prop: function(context, propName){
-	            return function(value){
-	                if (value === undef){
-	                    return context[propName];
-	                }
-	                else{
-	                    context[propName] = value;
-	                    return this;
-	                }
-	            };
-	        }
-	    };
-	    
-	    /**
-	     * Wrapper Private Methods
-	     */
-	    var wrapperPrvt = {
-	        /**
-	         * @function init
-	         * Copy over all members from obj and create corresponding chain-style
-	         * wrapping function.
-	         */
-	        init: function(obj){
-	            this._0_target = obj;
-	            var type;
-	            for(var name in obj){
-	                type = (typeof obj[name]);
-	                if (type.indexOf(FUNCTION) >= 0){
-	                    this[name] = wrappers.func(obj, name);
-	                }
-	                else{
-	                    this[name] = wrappers.prop(obj, name);
-	                }
-	            }
-	        }
-	    };
-	    
-	    var wrapperCtor = function(obj){
-	        wrapperPrvt.init.call(this, obj);
-	    };
-	    
-	    wrapperCtor.prototype = {
-	        _0_rebuild: function(){
-	            wrapperPrvt.init.call(this, this._0_target);
-	            return this;
-	        }
-	    };
-	    
-	    fn.chainable = chn;
-	    
-	}();
+        var chn = function(){
+            return new wrapperCtor(this);
+        };
+        
+       
+        var wrappers = {
+            func: function(context, propName){
+                return function(){
+                    var ret = context[propName].apply(context, arguments);
+                        
+                    // if no return value, return myself
+                    if (ret === undef){
+                        return this;
+                    }
+                    return ret;
+                };
+            },
+            prop: function(context, propName){
+                return function(value){
+                    if (value === undef){
+                        return context[propName];
+                    }
+                    else{
+                        context[propName] = value;
+                        return this;
+                    }
+                };
+            }
+        };
+        
+        /**
+         * Wrapper Private Methods
+         */
+        var wrapperPrvt = {
+            /**
+             * @function init
+             * Copy over all members from obj and create corresponding chain-style
+             * wrapping function.
+             */
+            init: function(obj){
+                this._0_target = obj;
+                var type;
+                for(var name in obj){
+                    type = (typeof obj[name]);
+                    if (type.indexOf(FUNCTION) >= 0){
+                        this[name] = wrappers.func(obj, name);
+                    }
+                    else{
+                        this[name] = wrappers.prop(obj, name);
+                    }
+                }
+            }
+        };
+        
+        var wrapperCtor = function(obj){
+            wrapperPrvt.init.call(this, obj);
+        };
+        
+        wrapperCtor.prototype = {
+            _0_rebuild: function(){
+                wrapperPrvt.init.call(this, this._0_target);
+                return this;
+            }
+        };
+        
+        fn.chainable = chn;
+        
+    }();
 
-	/**
-	 * @function boeObject.shadow
-	 * Fast clone the object
-	 **/
-	!function(){
-		function Cloner(){
-		}
+    /**
+     * @function boeObject.shadow
+     * Fast clone the object
+     **/
+    !function(){
+        function Cloner(){
+        }
 
-		var objectCache = [];
-		var traverseMark = '__boeObjectShadow_Traversed';
+        var objectCache = [];
+        var traverseMark = '__boeObjectShadow_Traversed';
 
-		fn.shadow = function boeObjectFastClone(deep){
-		    var ret,
-		    	obj = this;
+        fn.shadow = function boeObjectFastClone(deep){
+            var ret,
+                obj = this;
 
-		    if ( traverseMark in this ) {
-		    	// current object is already traversed
-		    	// no need to clone, return the clone directly
-		    	return this[traverseMark];
-		    }
+            if ( traverseMark in this ) {
+                // current object is already traversed
+                // no need to clone, return the clone directly
+                return this[traverseMark];
+            }
 
-		    // push to stack
-		    objectCache.push( this );
+            // push to stack
+            objectCache.push( this );
 
-		    if (typeof this == FUNCTION) {
-			    ret = window.eval("true?(" + FUNCTION_PROTO.toString.call(this) + "):false");
-			    this[traverseMark] = ret;
-			    util.mixin( ret, this, ( deep ? function( key, value ){
-			    	if ( key == traverseMark ) {
-			    		return UNDEF;
-			    	}
-			    	if (typeof value == OBJECT || typeof value == FUNCTION) {
-			    		return boeObjectFastClone.call( value, deep );
-			    	}
-			    	else {
-			    		return value;
-			    	}
-			    } : UNDEF ) );
-			    // remove unneccesary copy of traverseMark
-			    delete ret[traverseMark];
-			}
-			else {
-				Cloner.prototype = obj;
-			    ret = new Cloner();
-				this[traverseMark] = ret;
-			    if (deep){
-			    	for(var key in ret){
-			    		if ( key == traverseMark && ret.hasOwnProperty(key) == false ) {
-			    			// if it is the traverseMark on the proto, skip it
-			    			continue;
-			    		}
-				        var cur = ret[key];
-				        if (typeof cur == OBJECT || typeof cur == FUNCTION) {
-				            ret[key] = boeObjectFastClone.call( cur, deep );
-				        }
-				    }
-			    }
-			}
+            if (typeof this == FUNCTION) {
+                ret = window.eval("true?(" + FUNCTION_PROTO.toString.call(this) + "):false");
+                this[traverseMark] = ret;
+                util.mixin( ret, this, ( deep ? function( key, value ){
+                    if ( key == traverseMark ) {
+                        return UNDEF;
+                    }
+                    if (typeof value == OBJECT || typeof value == FUNCTION) {
+                        return boeObjectFastClone.call( value, deep );
+                    }
+                    else {
+                        return value;
+                    }
+                } : UNDEF ) );
+                // remove unneccesary copy of traverseMark
+                delete ret[traverseMark];
+            }
+            else {
+                Cloner.prototype = obj;
+                ret = new Cloner();
+                this[traverseMark] = ret;
+                if (deep){
+                    for(var key in ret){
+                        if ( key == traverseMark && ret.hasOwnProperty(key) == false ) {
+                            // if it is the traverseMark on the proto, skip it
+                            continue;
+                        }
+                        var cur = ret[key];
+                        if (typeof cur == OBJECT || typeof cur == FUNCTION) {
+                            ret[key] = boeObjectFastClone.call( cur, deep );
+                        }
+                    }
+                }
+            }
 
-			if ( objectCache.pop( ) != this ) {
-				throw "boe.Object.shadow: stack corrupted."
-			}
+            if ( objectCache.pop( ) != this ) {
+                throw "boe.Object.shadow: stack corrupted."
+            }
 
-			delete this[traverseMark];
+            delete this[traverseMark];
 
-		    return ret;
-		}
-	}();
+            return ret;
+        }
+    }();
 
-	util.mixinAsStatic(boeObject, fn);
+    (function(){
 
-	return boeObject;
+        var objectCache = [];
+        var traverseMark = '__boeObjectClone_Traversed';
+
+        fn.clone = function boeObjectClone( deep ){
+            var ret,
+                obj = this;
+
+            if ( traverseMark in this ) {
+                // current object is already traversed
+                // no need to clone, return the clone directly
+                return this[traverseMark];
+            }
+
+            // push to stack
+            objectCache.push( this );
+
+            // clone starts
+            if (typeof this == FUNCTION) {
+                ret = window.eval("true?(" + FUNCTION_PROTO.toString.call(this) + "):false");
+            }
+            else {
+                ret = {};
+            }
+
+            this[traverseMark] = ret;
+
+            for( var key in this ) {
+
+                if ( this.hasOwnProperty(key) == false || key == traverseMark ) {
+                    // if it is the traverseMark on the proto, skip it
+                    continue;
+                }
+
+                var cur = this[key];
+
+                if ( deep && (typeof cur == OBJECT || typeof cur == FUNCTION) ) {
+                    ret[key] = boeObjectClone.call( cur, deep );
+                }
+                else {
+                    ret[key] = cur;
+                }
+            }
+
+            // clone ends
+
+            if ( objectCache.pop( ) != this ) {
+                throw "boe.Object.shadow: stack corrupted."
+            }
+
+            delete this[traverseMark];
+
+            return ret;
+        };
+
+    })();
+
+    util.mixinAsStatic(boeObject, fn);
+
+    return boeObject;
 });
 
 /* 
