@@ -36,6 +36,10 @@
                 it( 'is an function', function(){
                     expect( boeFunction ).is.a( 'function' );
                 });
+
+                it( 'is same as boe.Function', function(){
+                    expect( boeFunction ).equal( boe.Function );
+                });
             });
 
             describe( 'boe.Function.once', function(){
@@ -207,6 +211,96 @@
             describe( 'boe.Function.cage', function(){
                 it( 'is an function', function(){
                     expect( boe.Function.cage ).is.a( 'function' );
+                });
+
+                it( 'should make sure the original function executed under specified context with specified args, even when it is newed', function(){
+                    var foobar = {};
+                    
+                    var func = function(arg1, arg2, arg3){
+                        expect( this ).equal( foobar );
+                        expect( arg1 ).equal( 2 );
+                        expect( arg2 ).equal( "hello" );
+                        expect( arg3 ).equal( true );
+                    }
+                    
+                    var boed = boe( func );
+
+                    var caged = boed.cage(foobar, 2, "hello");
+
+                    caged( true );
+                    new caged( true );
+                });
+
+                it('\'s static method should work the same way', function(){
+                    var foobar = {};
+                    
+                    var func = function(arg1, arg2, arg3){
+                        expect( this ).equal( foobar );
+                        expect( arg1 ).equal( 2 );
+                        expect( arg2 ).equal( "hello" );
+                        expect( arg3 ).equal( true );
+                    }
+
+                    var caged = boe.Function.cage(func, foobar, 2, "hello");
+
+                    caged( true );
+                    new caged( true );
+                })
+            });
+
+            describe( 'boe.Function.bind', function(){
+                it( 'is an function', function(){
+                    expect( boe.Function.bind ).is.a( 'function' );
+                });
+
+                it( 'should make sure the original function executed under specified context with specified args, but not when it is newed', function(){
+                    var negative = false;
+                    var foobar = {};
+                    
+                    var func = function(arg1, arg2, arg3){
+                        if (negative) { 
+                            expect( this ).is.an.instanceof( func );
+                        }
+                        else {
+                            expect( this ).equal( foobar );
+                        }
+                        expect( arg1 ).equal( 2 );
+                        expect( arg2 ).equal( "hello" );
+                        expect( arg3 ).equal( true );
+                    }
+                    
+                    var boed = boe( func );
+
+                    var bound = boed.bind(foobar, 2, "hello");
+
+                    bound( true );
+                    // negative the test case
+                    negative = true;
+                    new bound( true );
+                });
+
+                it('\'s static method should work the same way', function(){
+                    var negative = false;
+                    var foobar = {};
+                    
+                    var func = function(arg1, arg2, arg3){
+                        if (negative) { 
+                            expect( this ).is.an.instanceof( func );
+                        }
+                        else {
+                            expect( this ).equal( foobar );
+                        }
+                        expect( arg1 ).equal( 2 );
+                        expect( arg2 ).equal( "hello" );
+                        expect( arg3 ).equal( true );
+                    }
+
+                    var bound = boe.Function.bind(func, foobar, 2, "hello");
+
+                    bound( true );
+                    // negative the test case
+                    negative = true;
+                    new bound( true );
                 });
             });
 
