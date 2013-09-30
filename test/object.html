@@ -64,6 +64,125 @@
                 })
             });
 
+            describe('boe.Object.clone', function(){
+                it( 'is an function', function(){
+                    expect( boe.Object.clone ).is.a( 'function' );
+                })
+
+                it( 'creates a new object which has same properties as the original object', function(){
+                    var foobar = {
+                        a: 123,
+                        b: function(add){
+                            this.a += add
+                        }
+                    };
+
+                    var boed = boe(foobar);
+                    var cloned = boed.clone();
+
+                    expect( cloned ).not.equal( foobar );
+                    expect( cloned.a ).equal( foobar.a );
+                    expect( cloned.b ).equal( foobar.b );
+
+                })
+
+                it( 'does deep clone if the first argument is true (also make sure function member\'s member is clone as well)', function(){
+                    var func = function(add){
+                        this.a += add
+                    };
+
+                    func.a = 3;
+                    func.b = function(subtract){
+                        this.a -= subtract;
+                    };
+
+                    var foobar = {
+                        a: 123,
+                        b: func
+                    };
+
+                    var boed = boe(foobar);
+                    var cloned = boed.clone( true );
+
+                    expect( cloned ).not.equal( foobar );
+                    expect( cloned.a ).equal( foobar.a );
+                    expect( cloned.b ).not.equal( foobar.b );
+                    expect( cloned.b.a ).equal( foobar.b.a );
+                    expect( cloned.b.b ).not.equal( foobar.b.b );
+
+                    // the clone function should do the same thing
+                    foobar.b.b(5);
+                    cloned.b.b(5);
+
+                    expect( cloned.b.a ).equal( foobar.b.a );
+
+                })
+
+                it('even clone self reference object', function(){
+                    var func = function(){
+
+                    };
+
+                    func.a = func;
+
+                    var foobar = {
+                        a: 1,
+                        b: func,
+                        c: {}
+                    };
+
+                    foobar.c.a = foobar;
+
+                    var boed = boe( foobar );
+                    var cloned = boed.clone(true);
+
+                    expect( cloned ).not.equal( foobar );
+                    expect( cloned.c.a ).equal( cloned );
+                    expect( cloned.c.a ).not.equal( foobar.c.a );
+                    expect( cloned.b.a ).equal( cloned.b.a );
+                    expect( cloned.b.a ).not.equal( foobar.b.a );
+
+                    // make sure the tags are cleaned out
+                    expect( boed ).to.have.not.property( '__boeObjectClone_Traversed' );
+                })
+
+                it( 'return a new clone and the clone object will not be affected when clonee is modified', function(){
+                    var foobar = {
+                        a: 123,
+                        b: function(add){
+                            this.a += add
+                        }
+                    };
+
+                    var boed = boe(foobar);
+                    var cloned = boed.clone();
+
+                    foobar.a = 456;
+                    foobar.b = function(){};
+
+                    expect( cloned ).not.equal( foobar );
+                    expect( cloned.a ).equal( 123 );
+                    expect( cloned.b ).not.equal( foobar.b );
+
+                })
+
+                it( 'work the same when its the static alias is called', function(){
+                    var foobar = {
+                        a: 123,
+                        b: function(add){
+                            this.a += add
+                        }
+                    };
+
+                    var cloned = boe.Object.clone(foobar);
+
+                    expect( cloned ).not.equal( foobar );
+                    expect( cloned.a ).equal( foobar.a );
+                    expect( cloned.b ).equal( foobar.b );
+
+                })
+            })
+
             describe( 'boe.Object.shadow', function(){
                 it( 'is an function', function(){
                     expect( boe.Object.shadow ).is.a( 'function' );
@@ -144,6 +263,48 @@
 
                     // make sure the tags are cleaned out
                     expect( boed ).to.have.not.property( '__boeObjectShadow_Traversed' );
+                })
+
+                it( 'work much faster than Object.clone when doing shallow', function(){
+                    var foobar = {}, type;
+
+                    for(var l = 0xFFFF; l--;){
+                        foobar[l.toString(16)] = {};
+                        // for(var m = 0xFF; m--;){
+                        //     type = m % 4 
+                        //     switch(type){
+                        //         case 1:
+                        //             foobar[l.toString(16)][m.toString(16)] = {};
+                        //             break;
+                        //         case 2:
+                        //             foobar[l.toString(16)][m.toString(16)] = function(){};
+                        //             break;
+                        //         case 3:
+                        //             foobar[l.toString(16)][m.toString(16)] = 1;
+                        //         default:
+                        //             foobar[l.toString(16)][m.toString(16)] = "hello";
+                        //             break;
+                        //     }
+                        // }
+                    }
+
+                    var tmp;   
+                    var shadowTimeSpan = 0;
+                    var cloneTimeSpan = 0;
+
+                    tmp = Date.now();
+                    boe.Object.clone( foobar )
+                    cloneTimeSpan = Date.now() - tmp;
+
+                    tmp = Date.now();
+                    boe.Object.shadow( foobar )
+                    shadowTimeSpan = Date.now() - tmp;
+
+                    expect( shadowTimeSpan ).to.be.below( cloneTimeSpan );
+
+                    console.log('shadowTimeSpan', shadowTimeSpan);
+                    console.log('cloneTimeSpan', cloneTimeSpan);
+                    
                 })
 
                 it( 'work the same when its the static alias is called', function(){

@@ -169,9 +169,13 @@ Object.prototype.chainable(): Convert the object's members to methods that eithe
 		console.log( foo.hello() );
 		console.log( foo.bar().hello() );
 
-Object.prototype.shadow(deepClone): Persudo clone, return a new object which its __proto__ point to the original object.
+Object.prototype.clone(deepClone): Object clone
 
 * deepClone: default to false, true to indicate clone sub objects and functions as well.
+
+Object.prototype.shadow(deepShadow): Persudo clone, return a new object which its __proto__ point to the original object. shadow() usually faster than clone() when doing shallow copy.
+
+* deepShadow: default to false, true to indicate clone sub objects and functions as well.
 
 ###String
 
