@@ -54,6 +54,9 @@ define(function(){
                 return __method.apply(context, args.concat(slice.call(arguments)));
             };
         },
+        slice: function(arr) {
+            return ARRAY_PROTO.slice.call(arr);
+        },
         g: global
     };
 

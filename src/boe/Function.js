@@ -1,12 +1,12 @@
 /* 
  * Function extensions
  */
-define(['./util'], function(util){
+define(['./util', './Function/once', './Function/memorize', './Function/cage'], 
+    function(util, once, memorize, cage){
+
     "use strict";
     
     var global = util.g;
-    var OBJECT_PROTO = global.Object.prototype;
-    var ARRAY_PROTO = global.Array.prototype;
     var FUNCTION_PROTO = global.Function.prototype;
 
     var fnCreator = {};
@@ -36,7 +36,7 @@ define(['./util'], function(util){
             // the reason we don't simply "bind" the member function's "this" to var "me", is because
             // we want to offer flexibility to user so that they can change the runtime context even when function is memorized or onced.
             return function() {
-                var args = [ this, func ].concat( ARRAY_PROTO.slice.call(arguments) );
+                var args = [ this, func ].concat( util.slice(arguments) );
                 return value.call.apply( value, args );
             };
         });
@@ -52,117 +52,12 @@ define(['./util'], function(util){
      * @param context the context to run the function
      * @param arguments the arguments to be passed.
      **/
-    !function(){
-        var calledFuncs = [];
-        
-        function has(callback){
-            var l = calledFuncs.length;
-            while(l--){
-                if (calledFuncs[l] === callback){
-                    return true;
-                }
-            }
-            
-            return false;
-        };
-        
-        fnCreator.once = function( callback ){
-            var callbackArgs = ARRAY_PROTO.slice.call(arguments);
-            callbackArgs[0] = this;
-
-            if (callback != null && 
-                OBJECT_PROTO.toString.call(callback).toLowerCase() !==
-                '[object function]'){
-                throw new Error('boeFunction.once.ownerNotFunction');
-            }
-            if (has(callback)){
-                return null;
-            }
-            
-            calledFuncs.push(callback);
-            
-            return callback.call.apply(callback, callbackArgs);
-            
-        };
-    }();
+    fnCreator.once = once;
     
     /**
      * @function boeFunction.memorize
      **/
-    !function(undef){
-        function Node(){
-            this.subs = [];
-            this.value = null;
-        };
-        
-        Node.prototype.get = function(value){
-            var subs = this.subs;
-            var l = subs.length;
-            while(l--){
-                if (subs[l].value === value){
-                    return subs[l];
-                }
-            }
-            
-            return undef;
-        };
-        
-        Node.prototype.add = function(value){
-            var subs = this.subs;
-            var ret = new Node;
-            ret.value = value;
-            subs[subs.length] = ret;
-            return ret;
-        };
-        
-        fnCreator.memorize = function( callback ){
-            var callbackArgs = ARRAY_PROTO.slice.call(arguments);
-            callbackArgs[0] = this;
-
-            if (callback != null && 
-                OBJECT_PROTO.toString.call(callback).toLowerCase() !==
-                '[object function]'){
-                throw new Error('boeFunction.memorize.ownerNotFunction');
-            }
-            
-            if (!callback.__memorizeData__){
-                callback.__memorizeData__ = new Node;
-            }
-            
-            var root = callback.__memorizeData__;
-            var i, l, cursor = root;
-            
-            var ret = null;
-            
-            
-            // cache it and then return it
-            for(i = 0, l= arguments.length; i < l; i++){
-                var arg = arguments[i],
-                    argNode = cursor.get(arg);
-                    
-                if (argNode === undef){
-                    
-                    // cache the arguments to the tree
-                    for(;i < l; i++){
-                        cursor = cursor.add(arguments[i]);
-                    }
-                    
-                    // call original function and cache the result
-                    cursor.ret = callback.call.apply(callback, callbackArgs);
-                    return cursor.ret;
-                }
-                else{
-                    cursor = argNode;
-                }
-                
-            };
-            
-            ret = cursor.ret;
-            
-            return ret;
-            
-        };
-    }();
+    fnCreator.memorize = memorize;
 
     /**
      * @function boeFunction.cage
@@ -176,16 +71,7 @@ define(['./util'], function(util){
      * bar2 = foo.bind(window);
      * new bar2();
      **/
-    !function(){
-        fn.cage = function(context) {
-            var slice = ARRAY_PROTO.slice;
-            var __method = this, args = slice.call(arguments);
-            args.shift();
-            return function() {
-                return __method.apply(context, args.concat(slice.call(arguments)));
-            };
-        };
-    }();
+    fn.cage = cage;
 
     /**
      * Binds function execution context to specified object, locks its execution scope to an object.

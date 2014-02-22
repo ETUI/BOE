@@ -1,14 +1,11 @@
 /* 
  * Object extensions
  */
-define(['./util'], function(util){
+define(['./util', './Object/chainable', './Object/shadow', './Object/clone'], 
+    function(util, chainable, shadow, clone){
     "use strict";
 
-    var FUNCTION = 'function';
-    var OBJECT = 'object';
     var UNDEF;
-
-    var FUNCTION_PROTO = Function.prototype;
 
     var fn = {};
 
@@ -34,203 +31,19 @@ define(['./util'], function(util){
      * Convert members of any object to return object itself so we can use
      * that object 'chain-style'.
      **/
-    !function(undef){
-
-        var chn = function(){
-            return new wrapperCtor(this);
-        };
-        
-       
-        var wrappers = {
-            func: function(context, propName){
-                return function(){
-                    var ret = context[propName].apply(context, arguments);
-                        
-                    // if no return value, return myself
-                    if (ret === undef){
-                        return this;
-                    }
-                    return ret;
-                };
-            },
-            prop: function(context, propName){
-                return function(value){
-                    if (value === undef){
-                        return context[propName];
-                    }
-                    else{
-                        context[propName] = value;
-                        return this;
-                    }
-                };
-            }
-        };
-        
-        /**
-         * Wrapper Private Methods
-         */
-        var wrapperPrvt = {
-            /**
-             * @function init
-             * Copy over all members from obj and create corresponding chain-style
-             * wrapping function.
-             */
-            init: function(obj){
-                this._0_target = obj;
-                var type;
-                for(var name in obj){
-                    type = (typeof obj[name]);
-                    if (type.indexOf(FUNCTION) >= 0){
-                        this[name] = wrappers.func(obj, name);
-                    }
-                    else{
-                        this[name] = wrappers.prop(obj, name);
-                    }
-                }
-            }
-        };
-        
-        var wrapperCtor = function(obj){
-            wrapperPrvt.init.call(this, obj);
-        };
-        
-        wrapperCtor.prototype = {
-            _0_rebuild: function(){
-                wrapperPrvt.init.call(this, this._0_target);
-                return this;
-            }
-        };
-        
-        fn.chainable = chn;
-        
-    }();
+    fn.chainable = chainable;
 
     /**
      * @function boeObject.shadow
      * Fast clone the object
      **/
-    !function(){
-        function Cloner(){
-        }
+    fn.shadow = shadow;
 
-        var objectCache = [];
-        var traverseMark = '__boeObjectShadow_Traversed';
-
-        fn.shadow = function boeObjectFastClone(deep){
-            var ret,
-                obj = this;
-
-            if ( traverseMark in this ) {
-                // current object is already traversed
-                // no need to clone, return the clone directly
-                return this[traverseMark];
-            }
-
-            // push to stack
-            objectCache.push( this );
-
-            if (typeof this == FUNCTION) {
-                ret = window.eval("true?(" + FUNCTION_PROTO.toString.call(this) + "):false");
-                this[traverseMark] = ret;
-                util.mixin( ret, this, ( deep ? function( key, value ){
-                    if ( key == traverseMark ) {
-                        return UNDEF;
-                    }
-                    if (typeof value == OBJECT || typeof value == FUNCTION) {
-                        return boeObjectFastClone.call( value, deep );
-                    }
-                    else {
-                        return value;
-                    }
-                } : UNDEF ) );
-                // remove unneccesary copy of traverseMark
-                delete ret[traverseMark];
-            }
-            else {
-                Cloner.prototype = obj;
-                ret = new Cloner();
-                this[traverseMark] = ret;
-                if (deep){
-                    for(var key in ret){
-                        if ( key == traverseMark && ret.hasOwnProperty(key) == false ) {
-                            // if it is the traverseMark on the proto, skip it
-                            continue;
-                        }
-                        var cur = ret[key];
-                        if (typeof cur == OBJECT || typeof cur == FUNCTION) {
-                            ret[key] = boeObjectFastClone.call( cur, deep );
-                        }
-                    }
-                }
-            }
-
-            if ( objectCache.pop( ) != this ) {
-                throw "boe.Object.shadow: stack corrupted."
-            }
-
-            delete this[traverseMark];
-
-            return ret;
-        }
-    }();
-
-    (function(){
-
-        var objectCache = [];
-        var traverseMark = '__boeObjectClone_Traversed';
-
-        fn.clone = function boeObjectClone( deep ){
-            var ret,
-                obj = this;
-
-            if ( traverseMark in this ) {
-                // current object is already traversed
-                // no need to clone, return the clone directly
-                return this[traverseMark];
-            }
-
-            // push to stack
-            objectCache.push( this );
-
-            // clone starts
-            if (typeof this == FUNCTION) {
-                ret = window.eval("true?(" + FUNCTION_PROTO.toString.call(this) + "):false");
-            }
-            else {
-                ret = {};
-            }
-
-            this[traverseMark] = ret;
-
-            for( var key in this ) {
-
-                if ( this.hasOwnProperty(key) == false || key == traverseMark ) {
-                    // if it is the traverseMark on the proto, skip it
-                    continue;
-                }
-
-                var cur = this[key];
-
-                if ( deep && (typeof cur == OBJECT || typeof cur == FUNCTION) ) {
-                    ret[key] = boeObjectClone.call( cur, deep );
-                }
-                else {
-                    ret[key] = cur;
-                }
-            }
-
-            // clone ends
-
-            if ( objectCache.pop( ) != this ) {
-                throw "boe.Object.shadow: stack corrupted."
-            }
-
-            delete this[traverseMark];
-
-            return ret;
-        };
-
-    })();
+    /**
+     * @function boeObject.clone
+     * Clone the object
+     **/
+    fn.clone = clone;
 
     util.mixinAsStatic(boeObject, fn);
 

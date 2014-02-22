@@ -1,7 +1,7 @@
 (function() { 
-var global = new Function('return this')();var parentDefine = global.define || (function(factory){ window.boe = factory(); }) ;
+var global = new Function('return this')();var parentDefine = global.define || (function(factory){ var ret = factory();typeof module != 'undefined' && (module.exports = ret) ||(global.boe = ret); }) ;
 /**
- * almond 0.2.5 Copyright (c) 2011-2012, The Dojo Foundation All Rights Reserved.
+ * @license almond 0.2.9 Copyright (c) 2011-2014, The Dojo Foundation All Rights Reserved.
  * Available via the MIT or new BSD license.
  * see: http://github.com/jrburke/almond for details
  */
@@ -18,7 +18,8 @@ var requirejs, require, define;
         config = {},
         defining = {},
         hasOwn = Object.prototype.hasOwnProperty,
-        aps = [].slice;
+        aps = [].slice,
+        jsSuffixRegExp = /\.js$/;
 
     function hasProp(obj, prop) {
         return hasOwn.call(obj, prop);
@@ -33,7 +34,7 @@ var requirejs, require, define;
      * @returns {String} normalized name
      */
     function normalize(name, baseName) {
-        var nameParts, nameSegment, mapValue, foundMap,
+        var nameParts, nameSegment, mapValue, foundMap, lastIndex,
             foundI, foundStarMap, starI, i, j, part,
             baseParts = baseName && baseName.split("/"),
             map = config.map,
@@ -51,8 +52,15 @@ var requirejs, require, define;
                 //"one/two/three.js", but we want the directory, "one/two" for
                 //this normalization.
                 baseParts = baseParts.slice(0, baseParts.length - 1);
+                name = name.split('/');
+                lastIndex = name.length - 1;
 
-                name = baseParts.concat(name.split("/"));
+                // Node .js allowance:
+                if (config.nodeIdCompat && jsSuffixRegExp.test(name[lastIndex])) {
+                    name[lastIndex] = name[lastIndex].replace(jsSuffixRegExp, '');
+                }
+
+                name = baseParts.concat(name);
 
                 //start trimDots
                 for (i = 0; i < name.length; i += 1) {
@@ -261,14 +269,14 @@ var requirejs, require, define;
     main = function (name, deps, callback, relName) {
         var cjsModule, depName, ret, map, i,
             args = [],
+            callbackType = typeof callback,
             usingExports;
 
         //Use name if no relName
         relName = relName || name;
 
         //Call the callback to define the module, if necessary.
-        if (typeof callback === 'function') {
-
+        if (callbackType === 'undefined' || callbackType === 'function') {
             //Pull out the defined dependencies and pass the ordered
             //values to the callback.
             //Default to [require, exports, module] if no deps
@@ -299,7 +307,7 @@ var requirejs, require, define;
                 }
             }
 
-            ret = callback.apply(defined[name], args);
+            ret = callback ? callback.apply(defined[name], args) : undefined;
 
             if (name) {
                 //If setting exports via "module" is in play,
@@ -334,6 +342,13 @@ var requirejs, require, define;
         } else if (!deps.splice) {
             //deps is a config object, not an array.
             config = deps;
+            if (config.deps) {
+                req(config.deps, config.callback);
+            }
+            if (!callback) {
+                return;
+            }
+
             if (callback.splice) {
                 //callback is an array, which means it is a dependency list.
                 //Adjust args if there are dependencies
@@ -378,12 +393,13 @@ var requirejs, require, define;
      * the config return value is used.
      */
     req.config = function (cfg) {
-        config = cfg;
-        if (config.deps) {
-            req(config.deps, config.callback);
-        }
-        return req;
+        return req(cfg);
     };
+
+    /**
+     * Expose module registry for debugging and tooling
+     */
+    requirejs._defined = defined;
 
     define = function (name, deps, callback) {
 
@@ -406,7 +422,7 @@ var requirejs, require, define;
     };
 }());
 
-define("../components/almond/almond", function(){});
+define("../node_modules/almond/almond", function(){});
 
 define('boe/util',[],function(){
     
@@ -463,6 +479,9 @@ define('boe/util',[],function(){
                 }
                 return __method.apply(context, args.concat(slice.call(arguments)));
             };
+        },
+        slice: function(arr) {
+            return ARRAY_PROTO.slice.call(arr);
         },
         g: global
     };
@@ -934,15 +953,160 @@ define('boe/Array',['./util'], function(util){
     return boeArray;
 });
 
+/**
+ * @function boeFunction.once
+ * Do nothing if current function already executed once.
+ * @param context the context to run the function
+ * @param arguments the arguments to be passed.
+ **/
+define('boe/Function/once',['../util'], function(util){
+    var global = util.g;
+
+    var calledFuncs = [];
+    
+    function has(callback){
+        var l = calledFuncs.length;
+        while(l--){
+            if (calledFuncs[l] === callback){
+                return true;
+            }
+        }
+        
+        return false;
+    };
+    
+    function once( callback ){
+        var callbackArgs = util.slice(arguments);
+        callbackArgs[0] = this;
+
+        if (callback != null && 
+            util.type(callback) !== 'Function'){
+            throw new Error('boeFunction.once.ownerNotFunction');
+        }
+        if (has(callback)){
+            return null;
+        }
+        
+        calledFuncs.push(callback);
+        
+        return callback.call.apply(callback, callbackArgs);
+        
+    };
+
+    return once;
+});
+/**
+ * @function boeFunction.memorize
+ **/
+define('boe/Function/memorize',['../util'], function(util){
+    var undef;
+
+    function Node(){
+        this.subs = [];
+        this.value = null;
+    };
+    
+    Node.prototype.get = function(value){
+        var subs = this.subs;
+        var l = subs.length;
+        while(l--){
+            if (subs[l].value === value){
+                return subs[l];
+            }
+        }
+        
+        return undef;
+    };
+    
+    Node.prototype.add = function(value){
+        var subs = this.subs;
+        var ret = new Node;
+        ret.value = value;
+        subs[subs.length] = ret;
+        return ret;
+    };
+    
+    function memorize( callback ){
+        var callbackArgs = util.slice(arguments);
+        callbackArgs[0] = this;
+
+        if (callback != null && 
+            util.type(callback) !== 'Function'){
+            throw new Error('boeFunction.memorize.ownerNotFunction');
+        }
+        
+        if (!callback.__memorizeData__){
+            callback.__memorizeData__ = new Node;
+        }
+        
+        var root = callback.__memorizeData__;
+        var i, l, cursor = root;
+        
+        var ret = null;
+        
+        
+        // cache it and then return it
+        for(i = 0, l= arguments.length; i < l; i++){
+            var arg = arguments[i],
+                argNode = cursor.get(arg);
+                
+            if (argNode === undef){
+                
+                // cache the arguments to the tree
+                for(;i < l; i++){
+                    cursor = cursor.add(arguments[i]);
+                }
+                
+                // call original function and cache the result
+                cursor.ret = callback.call.apply(callback, callbackArgs);
+                return cursor.ret;
+            }
+            else{
+                cursor = argNode;
+            }
+            
+        };
+        
+        ret = cursor.ret;
+        
+        return ret;
+        
+    };
+
+    return memorize;
+});
+/**
+ * @function boeFunction.cage
+
+ * make sure the function was ran under certain context even it is 'newed'
+ * try below code with bind and cage:
+
+ * function foo(){console.log(this)}
+ * bar = foo.cage(window);
+ * new bar();
+ * bar2 = foo.bind(window);
+ * new bar2();
+ **/
+define('boe/Function/cage',['../util'], function(util){
+    function cage(context) {
+        var __method = this, args = util.slice(arguments);
+        args.shift();
+        return function() {
+            return __method.apply(context, args.concat(util.slice(arguments)));
+        };
+    };
+
+    return cage;
+});
 /* 
  * Function extensions
  */
-define('boe/Function',['./util'], function(util){
+define('boe/Function',['./util', './Function/once', './Function/memorize', './Function/cage'], 
+    function(util, once, memorize, cage){
+
     
     
     var global = util.g;
-    var OBJECT_PROTO = global.Object.prototype;
-    var ARRAY_PROTO = global.Array.prototype;
     var FUNCTION_PROTO = global.Function.prototype;
 
     var fnCreator = {};
@@ -972,7 +1136,7 @@ define('boe/Function',['./util'], function(util){
             // the reason we don't simply "bind" the member function's "this" to var "me", is because
             // we want to offer flexibility to user so that they can change the runtime context even when function is memorized or onced.
             return function() {
-                var args = [ this, func ].concat( ARRAY_PROTO.slice.call(arguments) );
+                var args = [ this, func ].concat( util.slice(arguments) );
                 return value.call.apply( value, args );
             };
         });
@@ -988,117 +1152,12 @@ define('boe/Function',['./util'], function(util){
      * @param context the context to run the function
      * @param arguments the arguments to be passed.
      **/
-    !function(){
-        var calledFuncs = [];
-        
-        function has(callback){
-            var l = calledFuncs.length;
-            while(l--){
-                if (calledFuncs[l] === callback){
-                    return true;
-                }
-            }
-            
-            return false;
-        };
-        
-        fnCreator.once = function( callback ){
-            var callbackArgs = ARRAY_PROTO.slice.call(arguments);
-            callbackArgs[0] = this;
-
-            if (callback != null && 
-                OBJECT_PROTO.toString.call(callback).toLowerCase() !==
-                '[object function]'){
-                throw new Error('boeFunction.once.ownerNotFunction');
-            }
-            if (has(callback)){
-                return null;
-            }
-            
-            calledFuncs.push(callback);
-            
-            return callback.call.apply(callback, callbackArgs);
-            
-        };
-    }();
+    fnCreator.once = once;
     
     /**
      * @function boeFunction.memorize
      **/
-    !function(undef){
-        function Node(){
-            this.subs = [];
-            this.value = null;
-        };
-        
-        Node.prototype.get = function(value){
-            var subs = this.subs;
-            var l = subs.length;
-            while(l--){
-                if (subs[l].value === value){
-                    return subs[l];
-                }
-            }
-            
-            return undef;
-        };
-        
-        Node.prototype.add = function(value){
-            var subs = this.subs;
-            var ret = new Node;
-            ret.value = value;
-            subs[subs.length] = ret;
-            return ret;
-        };
-        
-        fnCreator.memorize = function( callback ){
-            var callbackArgs = ARRAY_PROTO.slice.call(arguments);
-            callbackArgs[0] = this;
-
-            if (callback != null && 
-                OBJECT_PROTO.toString.call(callback).toLowerCase() !==
-                '[object function]'){
-                throw new Error('boeFunction.memorize.ownerNotFunction');
-            }
-            
-            if (!callback.__memorizeData__){
-                callback.__memorizeData__ = new Node;
-            }
-            
-            var root = callback.__memorizeData__;
-            var i, l, cursor = root;
-            
-            var ret = null;
-            
-            
-            // cache it and then return it
-            for(i = 0, l= arguments.length; i < l; i++){
-                var arg = arguments[i],
-                    argNode = cursor.get(arg);
-                    
-                if (argNode === undef){
-                    
-                    // cache the arguments to the tree
-                    for(;i < l; i++){
-                        cursor = cursor.add(arguments[i]);
-                    }
-                    
-                    // call original function and cache the result
-                    cursor.ret = callback.call.apply(callback, callbackArgs);
-                    return cursor.ret;
-                }
-                else{
-                    cursor = argNode;
-                }
-                
-            };
-            
-            ret = cursor.ret;
-            
-            return ret;
-            
-        };
-    }();
+    fnCreator.memorize = memorize;
 
     /**
      * @function boeFunction.cage
@@ -1112,16 +1171,7 @@ define('boe/Function',['./util'], function(util){
      * bar2 = foo.bind(window);
      * new bar2();
      **/
-    !function(){
-        fn.cage = function(context) {
-            var slice = ARRAY_PROTO.slice;
-            var __method = this, args = slice.call(arguments);
-            args.shift();
-            return function() {
-                return __method.apply(context, args.concat(slice.call(arguments)));
-            };
-        };
-    }();
+    fn.cage = cage;
 
     /**
      * Binds function execution context to specified object, locks its execution scope to an object.
@@ -1140,36 +1190,15 @@ define('boe/Function',['./util'], function(util){
     return boeFunction;
 });
 
-
-/* 
- * Number extensions
+/**
+ * @function toCurrency
+ * Return a string that with commas seperated every 3 char.
+ *
+ * @return {String} a string that represent the number and seperated with commas every 3 chars.
  */
-define('boe/Number',['./util'], function(util){
-    
-    var fn = {};
+define('boe/Number/toCurrency',[],function () {
 
-    /**
-     * @function boeNumber
-     * The Number object builder, copy over all our number helper to
-     * the instance
-     * 
-     * @usage var foo = 123;
-     * boeNumber(foo).toCurrency();
-     * 
-     */
-    var boeNumber = function(num){
-        num = new Number(num);
-        util.mixin(num, fn);
-        return num;
-    };
-    
-    /**
-     * @function toCurrency
-     * Return a string that with commas seperated every 3 char.
-     *
-     * @return {String} a string that represent the number and seperated with commas every 3 chars.
-     */
-    fn.toCurrency = function(fixedLength, formatFloat){
+    function toCurrency(fixedLength, formatFloat){
         var formated = this.valueOf() + '';
         var floatIndex = formated.indexOf('.');
         var chars = formated.split('');
@@ -1218,24 +1247,266 @@ define('boe/Number',['./util'], function(util){
         formated = result.join('');
         
         return formated;
+    }
+
+    return toCurrency;
+});
+
+/* 
+ * Number extensions
+ */
+define('boe/Number',['./util', './Number/toCurrency'], function(util, toCurrency){
+    
+    var fn = {};
+
+    /**
+     * @function boeNumber
+     * The Number object builder, copy over all our number helper to
+     * the instance
+     * 
+     * @usage var foo = 123;
+     * boeNumber(foo).toCurrency();
+     * 
+     */
+    var boeNumber = function(num){
+        num = new Number(num);
+        util.mixin(num, fn);
+        return num;
     };
+    
+    /**
+     * @function toCurrency
+     * Return a string that with commas seperated every 3 char.
+     *
+     * @return {String} a string that represent the number and seperated with commas every 3 chars.
+     */
+    fn.toCurrency = toCurrency;
 
     util.mixinAsStatic(boeNumber, fn);
 
     return boeNumber;
 });
 
-/* 
- * Object extensions
- */
-define('boe/Object',['./util'], function(util){
+/**
+ * @function boeObject.chainable
+ * Convert members of any object to return object itself so we can use
+ * that object 'chain-style'.
+ **/
+define('boe/Object/chainable',['../util'], function(util){
+
+    var undef;
+
+    function chainable(){
+        return new wrapperCtor(this);
+    };
     
+    var wrappers = {
+        func: function(context, propName){
+            return function(){
+                var ret = context[propName].apply(context, arguments);
+                    
+                // if no return value, return myself
+                if (ret === undef){
+                    return this;
+                }
+                return ret;
+            };
+        },
+        prop: function(context, propName){
+            return function(value){
+                if (value === undef){
+                    return context[propName];
+                }
+                else{
+                    context[propName] = value;
+                    return this;
+                }
+            };
+        }
+    };
+    
+    /**
+     * Wrapper Private Methods
+     */
+    var wrapperPrvt = {
+        /**
+         * @function init
+         * Copy over all members from obj and create corresponding chain-style
+         * wrapping function.
+         */
+        init: function(obj){
+            this._0_target = obj;
+            var type;
+            for(var name in obj){
+                if (util.type(obj[name]) == 'Function'){
+                    this[name] = wrappers.func(obj, name);
+                }
+                else{
+                    this[name] = wrappers.prop(obj, name);
+                }
+            }
+        }
+    };
+    
+    var wrapperCtor = function(obj){
+        wrapperPrvt.init.call(this, obj);
+    };
+    
+    wrapperCtor.prototype = {
+        _0_rebuild: function(){
+            wrapperPrvt.init.call(this, this._0_target);
+            return this;
+        }
+    };
+    
+    return chainable;
+
+});
+define('boe/Object/shadow',['../util'], function (util) {
 
     var FUNCTION = 'function';
     var OBJECT = 'object';
+    var FUNCTION_PROTO = util.g.Function.prototype;
     var UNDEF;
 
-    var FUNCTION_PROTO = Function.prototype;
+    function Cloner(){
+    }
+
+    var objectCache = [];
+    var traverseMark = '__boeObjectShadow_Traversed';
+
+    function boeObjectFastClone(deep){
+        var ret,
+            obj = this;
+
+        if ( traverseMark in this ) {
+            // current object is already traversed
+            // no need to clone, return the clone directly
+            return this[traverseMark];
+        }
+
+        // push to stack
+        objectCache.push( this );
+
+        if (typeof this == FUNCTION) {
+            ret = window.eval("true?(" + FUNCTION_PROTO.toString.call(this) + "):false");
+            this[traverseMark] = ret;
+            util.mixin( ret, this, ( deep ? function( key, value ){
+                if ( key == traverseMark ) {
+                    return UNDEF;
+                }
+                if (typeof value == OBJECT || typeof value == FUNCTION) {
+                    return boeObjectFastClone.call( value, deep );
+                }
+                else {
+                    return value;
+                }
+            } : UNDEF ) );
+            // remove unneccesary copy of traverseMark
+            delete ret[traverseMark];
+        }
+        else {
+            Cloner.prototype = obj;
+            ret = new Cloner();
+            this[traverseMark] = ret;
+            if (deep){
+                for(var key in ret){
+                    if ( key == traverseMark && ret.hasOwnProperty(key) == false ) {
+                        // if it is the traverseMark on the proto, skip it
+                        continue;
+                    }
+                    var cur = ret[key];
+                    if (typeof cur == OBJECT || typeof cur == FUNCTION) {
+                        ret[key] = boeObjectFastClone.call( cur, deep );
+                    }
+                }
+            }
+        }
+
+        if ( objectCache.pop( ) != this ) {
+            throw "boe.Object.shadow: stack corrupted."
+        }
+
+        delete this[traverseMark];
+
+        return ret;
+    }
+
+    return boeObjectFastClone;
+});
+define('boe/Object/clone',['../util'], function(util){
+
+    var FUNCTION = 'function';
+    var OBJECT = 'object';
+    var FUNCTION_PROTO = util.g.Function.prototype;
+
+    var objectCache = [];
+    var traverseMark = '__boeObjectClone_Traversed';
+
+    function boeObjectClone( deep ){
+        var ret,
+            obj = this;
+
+        if ( traverseMark in this ) {
+            // current object is already traversed
+            // no need to clone, return the clone directly
+            return this[traverseMark];
+        }
+
+        // push to stack
+        objectCache.push( this );
+
+        // clone starts
+        if (typeof this == FUNCTION) {
+            ret = window.eval("true?(" + FUNCTION_PROTO.toString.call(this) + "):false");
+        }
+        else if (util.type(this) == "Array") {
+            ret = [];
+        }
+        else {
+            ret = {};
+        }
+
+        this[traverseMark] = ret;
+
+        for( var key in this ) {
+
+            if ( this.hasOwnProperty(key) == false || key == traverseMark ) {
+                // if it is the traverseMark on the proto, skip it
+                continue;
+            }
+
+            var cur = this[key];
+
+            if ( deep && (typeof cur == OBJECT || typeof cur == FUNCTION) ) {
+                ret[key] = boeObjectClone.call( cur, deep );
+            }
+            else {
+                ret[key] = cur;
+            }
+        }
+
+        // clone ends
+
+        if ( objectCache.pop( ) != this ) {
+            throw "boe.Object.shadow: stack corrupted."
+        }
+
+        delete this[traverseMark];
+
+        return ret;
+    };
+
+    return boeObjectClone;
+});
+/* 
+ * Object extensions
+ */
+define('boe/Object',['./util', './Object/chainable', './Object/shadow', './Object/clone'], 
+    function(util, chainable, shadow, clone){
+    
+
+    var UNDEF;
 
     var fn = {};
 
@@ -1261,213 +1532,107 @@ define('boe/Object',['./util'], function(util){
      * Convert members of any object to return object itself so we can use
      * that object 'chain-style'.
      **/
-    !function(undef){
-
-        var chn = function(){
-            return new wrapperCtor(this);
-        };
-        
-       
-        var wrappers = {
-            func: function(context, propName){
-                return function(){
-                    var ret = context[propName].apply(context, arguments);
-                        
-                    // if no return value, return myself
-                    if (ret === undef){
-                        return this;
-                    }
-                    return ret;
-                };
-            },
-            prop: function(context, propName){
-                return function(value){
-                    if (value === undef){
-                        return context[propName];
-                    }
-                    else{
-                        context[propName] = value;
-                        return this;
-                    }
-                };
-            }
-        };
-        
-        /**
-         * Wrapper Private Methods
-         */
-        var wrapperPrvt = {
-            /**
-             * @function init
-             * Copy over all members from obj and create corresponding chain-style
-             * wrapping function.
-             */
-            init: function(obj){
-                this._0_target = obj;
-                var type;
-                for(var name in obj){
-                    type = (typeof obj[name]);
-                    if (type.indexOf(FUNCTION) >= 0){
-                        this[name] = wrappers.func(obj, name);
-                    }
-                    else{
-                        this[name] = wrappers.prop(obj, name);
-                    }
-                }
-            }
-        };
-        
-        var wrapperCtor = function(obj){
-            wrapperPrvt.init.call(this, obj);
-        };
-        
-        wrapperCtor.prototype = {
-            _0_rebuild: function(){
-                wrapperPrvt.init.call(this, this._0_target);
-                return this;
-            }
-        };
-        
-        fn.chainable = chn;
-        
-    }();
+    fn.chainable = chainable;
 
     /**
      * @function boeObject.shadow
      * Fast clone the object
      **/
-    !function(){
-        function Cloner(){
-        }
+    fn.shadow = shadow;
 
-        var objectCache = [];
-        var traverseMark = '__boeObjectShadow_Traversed';
-
-        fn.shadow = function boeObjectFastClone(deep){
-            var ret,
-                obj = this;
-
-            if ( traverseMark in this ) {
-                // current object is already traversed
-                // no need to clone, return the clone directly
-                return this[traverseMark];
-            }
-
-            // push to stack
-            objectCache.push( this );
-
-            if (typeof this == FUNCTION) {
-                ret = window.eval("true?(" + FUNCTION_PROTO.toString.call(this) + "):false");
-                this[traverseMark] = ret;
-                util.mixin( ret, this, ( deep ? function( key, value ){
-                    if ( key == traverseMark ) {
-                        return UNDEF;
-                    }
-                    if (typeof value == OBJECT || typeof value == FUNCTION) {
-                        return boeObjectFastClone.call( value, deep );
-                    }
-                    else {
-                        return value;
-                    }
-                } : UNDEF ) );
-                // remove unneccesary copy of traverseMark
-                delete ret[traverseMark];
-            }
-            else {
-                Cloner.prototype = obj;
-                ret = new Cloner();
-                this[traverseMark] = ret;
-                if (deep){
-                    for(var key in ret){
-                        if ( key == traverseMark && ret.hasOwnProperty(key) == false ) {
-                            // if it is the traverseMark on the proto, skip it
-                            continue;
-                        }
-                        var cur = ret[key];
-                        if (typeof cur == OBJECT || typeof cur == FUNCTION) {
-                            ret[key] = boeObjectFastClone.call( cur, deep );
-                        }
-                    }
-                }
-            }
-
-            if ( objectCache.pop( ) != this ) {
-                throw "boe.Object.shadow: stack corrupted."
-            }
-
-            delete this[traverseMark];
-
-            return ret;
-        }
-    }();
-
-    (function(){
-
-        var objectCache = [];
-        var traverseMark = '__boeObjectClone_Traversed';
-
-        fn.clone = function boeObjectClone( deep ){
-            var ret,
-                obj = this;
-
-            if ( traverseMark in this ) {
-                // current object is already traversed
-                // no need to clone, return the clone directly
-                return this[traverseMark];
-            }
-
-            // push to stack
-            objectCache.push( this );
-
-            // clone starts
-            if (typeof this == FUNCTION) {
-                ret = window.eval("true?(" + FUNCTION_PROTO.toString.call(this) + "):false");
-            }
-            else {
-                ret = {};
-            }
-
-            this[traverseMark] = ret;
-
-            for( var key in this ) {
-
-                if ( this.hasOwnProperty(key) == false || key == traverseMark ) {
-                    // if it is the traverseMark on the proto, skip it
-                    continue;
-                }
-
-                var cur = this[key];
-
-                if ( deep && (typeof cur == OBJECT || typeof cur == FUNCTION) ) {
-                    ret[key] = boeObjectClone.call( cur, deep );
-                }
-                else {
-                    ret[key] = cur;
-                }
-            }
-
-            // clone ends
-
-            if ( objectCache.pop( ) != this ) {
-                throw "boe.Object.shadow: stack corrupted."
-            }
-
-            delete this[traverseMark];
-
-            return ret;
-        };
-
-    })();
+    /**
+     * @function boeObject.clone
+     * Clone the object
+     **/
+    fn.clone = clone;
 
     util.mixinAsStatic(boeObject, fn);
 
     return boeObject;
 });
 
+/**
+ * @function toLowerCase
+ * Lower case specified substring
+ *
+ * @return {String} Upper cased string
+ */
+define('boe/String/toUpperCase',['../util'], function(util){
+    var STRING_PROTO = util.g.String.prototype;
+
+    function toUpperCase(startIndex, endIndex){
+        if (startIndex == null && endIndex == null){
+            return STRING_PROTO.toUpperCase.call(this);
+        }
+        
+        if (endIndex == null){
+            endIndex = this.length;
+        }
+        
+        var substr = this.substring(startIndex, endIndex).toUpperCase();
+        // concat and return
+        return this.substring(0, startIndex) + substr + this.substring(endIndex, this.length);
+    }
+
+    return toUpperCase;
+});
+/**
+ * @function toUpperCase
+ * Upper case specified substring
+ *
+ * @return {String} Upper cased string
+ */
+define('boe/String/toLowerCase',['../util'], function(util){
+    var STRING_PROTO = util.g.String.prototype;
+
+    function toLowerCase(startIndex, endIndex){
+        if (startIndex == null && endIndex == null){
+            return STRING_PROTO.toLowerCase.call(this);
+        }
+        
+        if (endIndex == null){
+            endIndex = this.length;
+        }
+        
+        var substr = this.substring(startIndex, endIndex).toLowerCase();
+        // concat and return
+        return this.substring(0, startIndex) + substr + this.substring(endIndex, this.length);
+    };
+
+    return toLowerCase;
+});
+define('boe/String/format',[],function () {
+    
+    function format() {
+        var str = this, a;
+        for (a = 0; a < arguments.length; ++a) {
+            str = str.replace(new RegExp("\\{" + a + "\\}", "g"), arguments[a]);
+        }
+        return str;
+    }
+
+    return format;
+});
+/*
+ * Trim specified chars at the start and the end of current string.
+ * @member String.prototype
+ * @return {String} trimed string
+ * @es5
+ */
+define('boe/String/trim',['../util'], function (util) {
+    var STRING_PROTO = util.g.String.prototype;
+    return STRING_PROTO.trim || function() {
+        var trimChar = '\\s';
+        var re = new RegExp('(^' + trimChar + '*)|(' + trimChar + '*$)', 'g');
+        return this.replace(re, "");
+    };
+});
 /* 
  * String extensions
  */
-define('boe/String',['./util'], function(util){
+define('boe/String',['./util', './String/toUpperCase', './String/toLowerCase', './String/format', './String/trim'], 
+    function(util, toUpperCase, toLowerCase, format, trim){
+
     
 
     var global = util.g;
@@ -1497,19 +1662,7 @@ define('boe/String',['./util'], function(util){
      *
      * @return {String} Upper cased string
      */
-    fn.toUpperCase = function(startIndex, endIndex){
-        if (startIndex == null && endIndex == null){
-            return STRING_PROTO.toUpperCase.call(this);
-        }
-        
-        if (endIndex == null){
-            endIndex = this.length;
-        }
-        
-        var substr = this.substring(startIndex, endIndex).toUpperCase();
-        // concat and return
-        return this.substring(0, startIndex) + substr + this.substring(endIndex, this.length);
-    };
+    fn.toUpperCase = toUpperCase;
 
     /**
      * @function toLowerCase
@@ -1517,19 +1670,7 @@ define('boe/String',['./util'], function(util){
      *
      * @return {String} Upper cased string
      */
-    fn.toLowerCase = function(startIndex, endIndex){
-        if (startIndex == null && endIndex == null){
-            return STRING_PROTO.toLowerCase.call(this);
-        }
-        
-        if (endIndex == null){
-            endIndex = this.length;
-        }
-        
-        var substr = this.substring(startIndex, endIndex).toLowerCase();
-        // concat and return
-        return this.substring(0, startIndex) + substr + this.substring(endIndex, this.length);
-    };
+    fn.toLowerCase = toLowerCase;
     
     /*
      * similar to the String.Format function in C#
@@ -1538,13 +1679,7 @@ define('boe/String',['./util'], function(util){
      * output:
      * "helloworld {yourname}"
      */
-    fn.format = function () {
-        var str = this, a;
-        for (a = 0; a < arguments.length; ++a) {
-            str = str.replace(new RegExp("\\{" + a + "\\}", "g"), arguments[a]);
-        }
-        return str;
-    };
+    fn.format = format;
 
     /*
      * Trim specified chars at the start and the end of current string.
@@ -1552,11 +1687,7 @@ define('boe/String',['./util'], function(util){
      * @return {String} trimed string
      * @es5
      */
-    STRING_PROTO.trim ? (fn.trim = function() {
-        var trimChar = '\\s';
-        var re = new RegExp('(^' + trimChar + '*)|(' + trimChar + '*$)', 'g');
-        return this.replace(re, "");
-    }):(nativeFn = STRING_PROTO.trim);
+    STRING_PROTO.trim ? (fn.trim = trim):(nativeFn = STRING_PROTO.trim);
 
     // Copy over fn to n.String, and make sure the 
     // first arg to the extension method is the context

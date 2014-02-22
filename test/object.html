@@ -86,6 +86,22 @@
 
                 })
 
+                it( 'creates a new array when used on an array', function(){
+                    var foobar = [1, 2];
+                    foobar.a = 123;
+                    foobar.b = function(add){
+                        this.a += add
+                    };
+
+                    var cloned = boe.Object.clone( foobar );
+
+                    expect( cloned ).not.equal( foobar );
+                    expect( cloned ).to.deep.equal( foobar );
+                    expect( cloned ).to.be.a( 'array' );
+
+
+                })
+
                 it( 'does deep clone if the first argument is true (also make sure function member\'s member is clone as well)', function(){
                     var func = function(add){
                         this.a += add

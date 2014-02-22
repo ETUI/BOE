@@ -1,0 +1,102 @@
+<!DOCTYPE HTML>
+<html lang="en-US">
+<head>
+    <meta charset="UTF-8">
+    <title></title>
+    <link rel="stylesheet" href="../components/mocha/mocha.css">
+</head>
+<body>
+    <script type="text/javascript" src="../components/requirejs/require.js"></script>
+    <script type="text/javascript" src="./amd-config.js"></script>
+    <script type="text/javascript">
+        require(['src/boe', 'src/boe/String' ,'mocha', 'chai'], function (boe, boeString, mocha, chai) {
+            var expect = chai.expect;
+            mocha.setup('bdd');
+
+            describe( 'boe.String', function(){
+                it( 'is an function', function(){
+                    expect( boe.String ).is.a( 'function' );
+                });
+            });
+
+            describe( 'boe/String', function(){
+                it( 'is an function', function(){
+                    expect( boeString ).is.a( 'function' );
+                });
+
+                it( 'is same as boe.String', function(){
+                    expect( boeString ).equal( boe.String );
+                });
+            });
+
+            describe( 'boe.String.format', function(){
+                it( 'is an function', function(){
+                    expect( boe.String.format ).is.a( 'function' );
+                });
+
+                it('format original string according to parameters', function(){
+                    var foobar = "hello {0}, {1}";
+
+                    var boed = boe(foobar);
+                    var formatted = boed.format("Norman", "Good morning!");
+
+                    expect( formatted ).equal( "hello Norman, Good morning!" );
+
+                });
+            });
+
+            describe('boe.String.toUpperCase', function(){
+                it( 'is an function', function(){
+                    expect( boe.String.toUpperCase ).is.a( 'function' );
+                })
+
+                it( 'convert specified substring to lower case', function(){
+                    var foobar = "abcdefg";
+
+                    var boed = boe(foobar);
+                    var lowered = boed.toUpperCase(1,2);
+
+                    expect( lowered ).equal( "aBcdefg" );
+
+                })
+            })
+
+            describe('boe.String.toLowerCase', function(){
+                it( 'is an function', function(){
+                    expect( boe.String.toLowerCase ).is.a( 'function' );
+                })
+
+                it( 'convert specified substring to lower case', function(){
+                    var foobar = "ABCDEFG";
+
+                    var boed = boe(foobar);
+                    var lowered = boed.toLowerCase(1,2);
+
+                    expect( lowered ).equal( "AbCDEFG" );
+
+                })
+            })
+
+            describe('boe.String.trim', function(){
+                it( 'is an function', function(){
+                    expect( boe.String.trim ).is.a( 'function' );
+                })
+
+                it( 'convert specified substring to lower case', function(){
+                    var foobar = "  AB CDEFG   ";
+
+                    var boed = boe(foobar);
+                    var trimmed = boed.trim(1,2);
+
+                    expect( trimmed ).equal( "AB CDEFG" );
+
+                })
+            })
+
+            mocha.checkLeaks();
+            mocha.run();
+        });
+    </script>
+    <div id="mocha"></div>
+</body>
+</html>

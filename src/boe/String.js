@@ -1,7 +1,9 @@
 /* 
  * String extensions
  */
-define(['./util'], function(util){
+define(['./util', './String/toUpperCase', './String/toLowerCase', './String/format', './String/trim'], 
+    function(util, toUpperCase, toLowerCase, format, trim){
+
     "use strict";
 
     var global = util.g;
@@ -31,19 +33,7 @@ define(['./util'], function(util){
      *
      * @return {String} Upper cased string
      */
-    fn.toUpperCase = function(startIndex, endIndex){
-        if (startIndex == null && endIndex == null){
-            return STRING_PROTO.toUpperCase.call(this);
-        }
-        
-        if (endIndex == null){
-            endIndex = this.length;
-        }
-        
-        var substr = this.substring(startIndex, endIndex).toUpperCase();
-        // concat and return
-        return this.substring(0, startIndex) + substr + this.substring(endIndex, this.length);
-    };
+    fn.toUpperCase = toUpperCase;
 
     /**
      * @function toLowerCase
@@ -51,19 +41,7 @@ define(['./util'], function(util){
      *
      * @return {String} Upper cased string
      */
-    fn.toLowerCase = function(startIndex, endIndex){
-        if (startIndex == null && endIndex == null){
-            return STRING_PROTO.toLowerCase.call(this);
-        }
-        
-        if (endIndex == null){
-            endIndex = this.length;
-        }
-        
-        var substr = this.substring(startIndex, endIndex).toLowerCase();
-        // concat and return
-        return this.substring(0, startIndex) + substr + this.substring(endIndex, this.length);
-    };
+    fn.toLowerCase = toLowerCase;
     
     /*
      * similar to the String.Format function in C#
@@ -72,13 +50,7 @@ define(['./util'], function(util){
      * output:
      * "helloworld {yourname}"
      */
-    fn.format = function () {
-        var str = this, a;
-        for (a = 0; a < arguments.length; ++a) {
-            str = str.replace(new RegExp("\\{" + a + "\\}", "g"), arguments[a]);
-        }
-        return str;
-    };
+    fn.format = format;
 
     /*
      * Trim specified chars at the start and the end of current string.
@@ -86,11 +58,7 @@ define(['./util'], function(util){
      * @return {String} trimed string
      * @es5
      */
-    STRING_PROTO.trim ? (fn.trim = function() {
-        var trimChar = '\\s';
-        var re = new RegExp('(^' + trimChar + '*)|(' + trimChar + '*$)', 'g');
-        return this.replace(re, "");
-    }):(nativeFn = STRING_PROTO.trim);
+    STRING_PROTO.trim ? (fn.trim = trim):(nativeFn = STRING_PROTO.trim);
 
     // Copy over fn to n.String, and make sure the 
     // first arg to the extension method is the context
