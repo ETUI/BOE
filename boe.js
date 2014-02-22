@@ -1552,7 +1552,7 @@ define('boe/Object',['./util', './Object/chainable', './Object/shadow', './Objec
 });
 
 /**
- * @function toLowerCase
+ * @function toUpperCase
  * Lower case specified substring
  *
  * @return {String} Upper cased string
@@ -1577,7 +1577,7 @@ define('boe/String/toUpperCase',['../util'], function(util){
     return toUpperCase;
 });
 /**
- * @function toUpperCase
+ * @function toLowerCase
  * Upper case specified substring
  *
  * @return {String} Upper cased string
