@@ -4,6 +4,9 @@
  *
  * @return {String} a string that represent the number and seperated with commas every 3 chars.
  */
+if (typeof define !== 'function' && typeof module != 'undefined') {
+    var define = require('amdefine')(module);
+}
 define(function () {
 
     function toCurrency(fixedLength, formatFloat){

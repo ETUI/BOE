@@ -3,6 +3,9 @@
  * Convert members of any object to return object itself so we can use
  * that object 'chain-style'.
  **/
+if (typeof define !== 'function' && typeof module != 'undefined') {
+    var define = require('amdefine')(module);
+}
 define(['../util'], function(util){
 
     var undef;

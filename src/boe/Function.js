@@ -1,6 +1,9 @@
 /* 
  * Function extensions
  */
+if (typeof define !== 'function' && typeof module != 'undefined') {
+    var define = require('amdefine')(module);
+}
 define(['./util', './Function/once', './Function/memorize', './Function/cage'], 
     function(util, once, memorize, cage){
 

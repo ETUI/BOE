@@ -10,6 +10,9 @@
  * bar2 = foo.bind(window);
  * new bar2();
  **/
+if (typeof define !== 'function' && typeof module != 'undefined') {
+    var define = require('amdefine')(module);
+}
 define(['../util'], function(util){
     function cage(context) {
         var __method = this, args = util.slice(arguments);

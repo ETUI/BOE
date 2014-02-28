@@ -9,7 +9,8 @@
     "grunt-contrib-requirejs": ">= 0.3.0",
     "grunt-contrib-uglify": ">= 0",
     "grunt-tagrelease": "~0.2.0",
-    "almond": "~0.2.9"
+    "almond": "~0.2.9",
+    "amdefine": "~0.1.0"
   },
   "scripts": {
     "postinstall": "bower install"

@@ -4,6 +4,9 @@
  * @param context the context to run the function
  * @param arguments the arguments to be passed.
  **/
+if (typeof define !== 'function' && typeof module != 'undefined') {
+    var define = require('amdefine')(module);
+}
 define(['../util'], function(util){
     var global = util.g;
 

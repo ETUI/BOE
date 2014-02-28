@@ -1,6 +1,9 @@
 /* 
  * Object extensions
  */
+if (typeof define !== 'function' && typeof module != 'undefined') {
+    var define = require('amdefine')(module);
+}
 define(['./util', './Object/chainable', './Object/shadow', './Object/clone'], 
     function(util, chainable, shadow, clone){
     "use strict";

@@ -1,6 +1,9 @@
 /**
  * @function boeFunction.memorize
  **/
+if (typeof define !== 'function' && typeof module != 'undefined') {
+    var define = require('amdefine')(module);
+}
 define(['../util'], function(util){
     var undef;
 

@@ -1,6 +1,9 @@
 /* 
  * Array extensions
  */
+if (typeof define !== 'function' && typeof module != 'undefined') {
+    var define = require('amdefine')(module);
+}
 define(['./util'], function(util){
     "use strict";
     var global = util.g;

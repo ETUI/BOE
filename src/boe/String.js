@@ -1,6 +1,9 @@
 /* 
  * String extensions
  */
+if (typeof define !== 'function' && typeof module != 'undefined') {
+    var define = require('amdefine')(module);
+}
 define(['./util', './String/toUpperCase', './String/toLowerCase', './String/format', './String/trim'], 
     function(util, toUpperCase, toLowerCase, format, trim){
 
