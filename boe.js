@@ -424,9 +424,6 @@ var requirejs, require, define;
 
 define("../node_modules/almond/almond", function(){});
 
-if (typeof define !== 'function' && typeof module != 'undefined') {
-    var define = require('amdefine')(module);
-}
 define('boe/util',[],function(){
     
     
@@ -494,9 +491,6 @@ define('boe/util',[],function(){
 /* 
  * Array extensions
  */
-if (typeof define !== 'function' && typeof module != 'undefined') {
-    var define = require('amdefine')(module);
-}
 define('boe/Array',['./util'], function(util){
     
     var global = util.g;
@@ -1107,9 +1101,6 @@ define('boe/Function/cage',['../util'], function(util){
 /* 
  * Function extensions
  */
-if (typeof define !== 'function' && typeof module != 'undefined') {
-    var define = require('amdefine')(module);
-}
 define('boe/Function',['./util', './Function/once', './Function/memorize', './Function/cage'], 
     function(util, once, memorize, cage){
 
@@ -1263,9 +1254,6 @@ define('boe/Number/toCurrency',[],function () {
 /* 
  * Number extensions
  */
-if (typeof define !== 'function' && typeof module != 'undefined') {
-    var define = require('amdefine')(module);
-}
 define('boe/Number',['./util', './Number/toCurrency'], function(util, toCurrency){
     
     var fn = {};
@@ -1513,9 +1501,6 @@ define('boe/Object/clone',['../util'], function(util){
 /* 
  * Object extensions
  */
-if (typeof define !== 'function' && typeof module != 'undefined') {
-    var define = require('amdefine')(module);
-}
 define('boe/Object',['./util', './Object/chainable', './Object/shadow', './Object/clone'], 
     function(util, chainable, shadow, clone){
     
@@ -1644,9 +1629,6 @@ define('boe/String/trim',['../util'], function (util) {
 /* 
  * String extensions
  */
-if (typeof define !== 'function' && typeof module != 'undefined') {
-    var define = require('amdefine')(module);
-}
 define('boe/String',['./util', './String/toUpperCase', './String/toLowerCase', './String/format', './String/trim'], 
     function(util, toUpperCase, toLowerCase, format, trim){
 

@@ -1,9 +1,11 @@
 /* 
  * Object extensions
  */
+//>>excludeStart("release", pragmas.release);
 if (typeof define !== 'function' && typeof module != 'undefined') {
     var define = require('amdefine')(module);
 }
+//>>excludeEnd("release");
 define(['./util', './Object/chainable', './Object/shadow', './Object/clone'], 
     function(util, chainable, shadow, clone){
     "use strict";

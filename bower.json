@@ -1,6 +1,6 @@
 {
   "name": "BOE",
-  "version": "1.1.8",
+  "version": "1.1.9",
   "devDependencies": {
     "requirejs": "~2.1.8",
     "chai": "~1.8.0",
