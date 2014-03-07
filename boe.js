@@ -965,9 +965,6 @@ define('boe/Array',['./util'], function(util){
  * @param context the context to run the function
  * @param arguments the arguments to be passed.
  **/
-if (typeof define !== 'function' && typeof module != 'undefined') {
-    var define = require('amdefine')(module);
-}
 define('boe/Function/once',['../util'], function(util){
     var global = util.g;
 
@@ -1007,9 +1004,6 @@ define('boe/Function/once',['../util'], function(util){
 /**
  * @function boeFunction.memorize
  **/
-if (typeof define !== 'function' && typeof module != 'undefined') {
-    var define = require('amdefine')(module);
-}
 define('boe/Function/memorize',['../util'], function(util){
     var undef;
 
@@ -1099,9 +1093,6 @@ define('boe/Function/memorize',['../util'], function(util){
  * bar2 = foo.bind(window);
  * new bar2();
  **/
-if (typeof define !== 'function' && typeof module != 'undefined') {
-    var define = require('amdefine')(module);
-}
 define('boe/Function/cage',['../util'], function(util){
     function cage(context) {
         var __method = this, args = util.slice(arguments);
@@ -1214,9 +1205,6 @@ define('boe/Function',['./util', './Function/once', './Function/memorize', './Fu
  *
  * @return {String} a string that represent the number and seperated with commas every 3 chars.
  */
-if (typeof define !== 'function' && typeof module != 'undefined') {
-    var define = require('amdefine')(module);
-}
 define('boe/Number/toCurrency',[],function () {
 
     function toCurrency(fixedLength, formatFloat){
@@ -1315,9 +1303,6 @@ define('boe/Number',['./util', './Number/toCurrency'], function(util, toCurrency
  * Convert members of any object to return object itself so we can use
  * that object 'chain-style'.
  **/
-if (typeof define !== 'function' && typeof module != 'undefined') {
-    var define = require('amdefine')(module);
-}
 define('boe/Object/chainable',['../util'], function(util){
 
     var undef;
@@ -1388,9 +1373,6 @@ define('boe/Object/chainable',['../util'], function(util){
     return chainable;
 
 });
-if (typeof define !== 'function' && typeof module != 'undefined') {
-    var define = require('amdefine')(module);
-}
 define('boe/Object/shadow',['../util'], function (util) {
 
     var FUNCTION = 'function';
@@ -1463,9 +1445,6 @@ define('boe/Object/shadow',['../util'], function (util) {
 
     return boeObjectFastClone;
 });
-if (typeof define !== 'function' && typeof module != 'undefined') {
-    var define = require('amdefine')(module);
-}
 define('boe/Object/clone',['../util'], function(util){
 
     var FUNCTION = 'function';
@@ -1592,9 +1571,6 @@ define('boe/Object',['./util', './Object/chainable', './Object/shadow', './Objec
  *
  * @return {String} Upper cased string
  */
-if (typeof define !== 'function' && typeof module != 'undefined') {
-    var define = require('amdefine')(module);
-}
 define('boe/String/toUpperCase',['../util'], function(util){
     var STRING_PROTO = util.g.String.prototype;
 
@@ -1620,9 +1596,6 @@ define('boe/String/toUpperCase',['../util'], function(util){
  *
  * @return {String} Upper cased string
  */
-if (typeof define !== 'function' && typeof module != 'undefined') {
-    var define = require('amdefine')(module);
-}
 define('boe/String/toLowerCase',['../util'], function(util){
     var STRING_PROTO = util.g.String.prototype;
 
@@ -1642,9 +1615,6 @@ define('boe/String/toLowerCase',['../util'], function(util){
 
     return toLowerCase;
 });
-if (typeof define !== 'function' && typeof module != 'undefined') {
-    var define = require('amdefine')(module);
-}
 define('boe/String/format',[],function () {
     
     function format() {
@@ -1663,9 +1633,6 @@ define('boe/String/format',[],function () {
  * @return {String} trimed string
  * @es5
  */
-if (typeof define !== 'function' && typeof module != 'undefined') {
-    var define = require('amdefine')(module);
-}
 define('boe/String/trim',['../util'], function (util) {
     var STRING_PROTO = util.g.String.prototype;
     return STRING_PROTO.trim || function() {

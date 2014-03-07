@@ -10,9 +10,11 @@
  * bar2 = foo.bind(window);
  * new bar2();
  **/
+//>>excludeStart("release", pragmas.release);
 if (typeof define !== 'function' && typeof module != 'undefined') {
     var define = require('amdefine')(module);
 }
+//>>excludeEnd("release");
 define(['../util'], function(util){
     function cage(context) {
         var __method = this, args = util.slice(arguments);

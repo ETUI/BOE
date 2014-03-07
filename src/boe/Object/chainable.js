@@ -3,9 +3,11 @@
  * Convert members of any object to return object itself so we can use
  * that object 'chain-style'.
  **/
+//>>excludeStart("release", pragmas.release);
 if (typeof define !== 'function' && typeof module != 'undefined') {
     var define = require('amdefine')(module);
 }
+//>>excludeEnd("release");
 define(['../util'], function(util){
 
     var undef;
