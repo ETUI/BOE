@@ -18,7 +18,7 @@ module.exports = function(grunt) {
             dist : {
                 options : {
                     baseUrl: './src',
-                    name: '../node_modules/almond/almond',
+                    name: '../components/amdshim/amdshim',
                     include: FILE_NAME_ENTRY,
                     out: FILE_NAME_OUT_MAX,
                     wrap: {
