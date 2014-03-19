@@ -13,7 +13,7 @@ require.config({
         } 
     ],
     shim: {
-        'mocha': {
+        'mocha/mocha': {
             exports: 'mocha'
         }
     }

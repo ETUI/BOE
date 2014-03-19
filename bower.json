@@ -2,9 +2,9 @@
   "name": "BOE",
   "version": "1.1.10",
   "devDependencies": {
-    "requirejs": "~2.1.8",
+    "requirejs": "~2.1.11",
     "chai": "~1.8.0",
-    "mocha": "~1.13.0",
+    "mocha": "~1.18.2",
     "amdshim": "~0.0.2"
   }
 }
