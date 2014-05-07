@@ -18,19 +18,20 @@ module.exports = function(grunt) {
             dist : {
                 options : {
                     baseUrl: './src',
-                    name: '../components/amdshim/amdshim',
+                    name: '../lib/amdshim/amdshim',
                     include: FILE_NAME_ENTRY,
                     out: FILE_NAME_OUT_MAX,
                     wrap: {
                         start: 
                             "(function() { \n" + 
                             "var global = new Function('return this')();" + 
-                            "var parentDefine = global.define || (function(factory){ " + 
+                            "var myDefine = (function(factory){ " + 
                                 "var ret = factory();" +
-                                "typeof module != 'undefined' && (module.exports = ret) ||" +
-                                "(global." + SPACE_NAME + " = ret); }) ;",
+                                "typeof module != 'undefined' && (module.exports = ret);" +
+                                "global.define && global.define(function(){return ret;});" +
+                                "global." + SPACE_NAME + " = ret; });",
                         end: 
-                            "parentDefine(function() { return require('" + SPACE_NAME + "'); }); \n" + 
+                            "myDefine(function() { return require('" + SPACE_NAME + "'); }); \n" + 
                             "}());"
                     },
                     pragmas: {

@@ -1,5 +1,5 @@
 (function() { 
-var global = new Function('return this')();var parentDefine = global.define || (function(factory){ var ret = factory();typeof module != 'undefined' && (module.exports = ret) ||(global.boe = ret); }) ;
+var global = new Function('return this')();var myDefine = (function(factory){ var ret = factory();typeof module != 'undefined' && (module.exports = ret);global.define && global.define(function(){return ret;});global.boe = ret; });
 var require, define;
 (function (undef) {
     var mod = {}, g = this;
@@ -73,7 +73,7 @@ var require, define;
         }
     };
 }());
-define("../components/amdshim/amdshim", function(){});
+define("../lib/amdshim/amdshim", function(){});
 
 define('boe/util',[],function(){
     
@@ -1264,24 +1264,48 @@ define('boe/String/format',[],function () {
     return format;
 });
 /*
+ * Trim specified chars at the start of current string.
+ * @member String.prototype
+ * @return {String} trimed string
+ */
+define('boe/String/trimLeft',[],function () {
+    return function() {
+        var trimChar = '\\s';
+        var re = new RegExp('(^' + trimChar + '*)', 'g');
+        return this.replace(re, "");
+    };
+});
+/*
+ * Trim specified chars at the end of current string.
+ * @member String.prototype
+ * @return {String} trimed string
+ */
+define('boe/String/trimRight',[], function () {
+    return function() {
+        var trimChar = '\\s';
+        var re = new RegExp('(' + trimChar + '*$)', 'g');
+        return this.replace(re, "");
+    };
+});
+/*
  * Trim specified chars at the start and the end of current string.
  * @member String.prototype
  * @return {String} trimed string
  * @es5
  */
-define('boe/String/trim',['../util'], function (util) {
+define('boe/String/trim',['../util', './trimLeft', './trimRight'], function (util, trimLeft, trimRight) {
     var STRING_PROTO = util.g.String.prototype;
     return STRING_PROTO.trim || function() {
-        var trimChar = '\\s';
-        var re = new RegExp('(^' + trimChar + '*)|(' + trimChar + '*$)', 'g');
-        return this.replace(re, "");
+        var ret = trimLeft.call( this );
+        ret = trimRight.call( ret );
+        return ret;
     };
 });
 /* 
  * String extensions
  */
-define('boe/String',['./util', './String/toUpperCase', './String/toLowerCase', './String/format', './String/trim'], 
-    function(util, toUpperCase, toLowerCase, format, trim){
+define('boe/String',['./util', './String/toUpperCase', './String/toLowerCase', './String/format', './String/trim', './String/trimLeft', './String/trimRight'], 
+    function(util, toUpperCase, toLowerCase, format, trim, trimLeft, trimRight){
 
     
 
@@ -1330,6 +1354,20 @@ define('boe/String',['./util', './String/toUpperCase', './String/toLowerCase', '
      * "helloworld {yourname}"
      */
     fn.format = format;
+
+    /*
+     * Trim specified chars at the start of current string.
+     * @member String.prototype
+     * @return {String} trimed string
+     */
+    fn.trimLeft = trimLeft
+
+    /*
+     * Trim specified chars at the end of current string.
+     * @member String.prototype
+     * @return {String} trimed string
+     */
+    fn.trimRight = trimRight
 
     /*
      * Trim specified chars at the start and the end of current string.
@@ -1408,5 +1446,5 @@ define('boe',['./boe/util', './boe/Array', './boe/Function', './boe/Number', './
     boe.String = boeString;
 
     return boe;
-});parentDefine(function() { return require('boe'); }); 
+});myDefine(function() { return require('boe'); }); 
 }());
