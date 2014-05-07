@@ -6,8 +6,8 @@ if (typeof define !== 'function' && typeof module != 'undefined') {
     var define = require('amdefine')(module);
 }
 //>>excludeEnd("release");
-define(['./util', './String/toUpperCase', './String/toLowerCase', './String/format', './String/trim'], 
-    function(util, toUpperCase, toLowerCase, format, trim){
+define(['./util', './String/toUpperCase', './String/toLowerCase', './String/format', './String/trim', './String/trimLeft', './String/trimRight'], 
+    function(util, toUpperCase, toLowerCase, format, trim, trimLeft, trimRight){
 
     "use strict";
 
@@ -56,6 +56,20 @@ define(['./util', './String/toUpperCase', './String/toLowerCase', './String/form
      * "helloworld {yourname}"
      */
     fn.format = format;
+
+    /*
+     * Trim specified chars at the start of current string.
+     * @member String.prototype
+     * @return {String} trimed string
+     */
+    fn.trimLeft = trimLeft
+
+    /*
+     * Trim specified chars at the end of current string.
+     * @member String.prototype
+     * @return {String} trimed string
+     */
+    fn.trimRight = trimRight
 
     /*
      * Trim specified chars at the start and the end of current string.

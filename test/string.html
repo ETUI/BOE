@@ -86,9 +86,41 @@
                     var foobar = "  AB CDEFG   ";
 
                     var boed = boe(foobar);
-                    var trimmed = boed.trim(1,2);
+                    var trimmed = boed.trim();
 
                     expect( trimmed ).equal( "AB CDEFG" );
+
+                })
+            })
+
+            describe('boe.String.trimLeft', function(){
+                it( 'is an function', function(){
+                    expect( boe.String.trimLeft ).is.a( 'function' );
+                })
+
+                it( 'convert specified substring to lower case', function(){
+                    var foobar = "  AB CDEFG   ";
+
+                    var boed = boe(foobar);
+                    var trimmed = boed.trimLeft();
+
+                    expect( trimmed ).equal( "AB CDEFG   " );
+
+                })
+            })
+
+            describe('boe.String.trimRight', function(){
+                it( 'is an function', function(){
+                    expect( boe.String.trimRight ).is.a( 'function' );
+                })
+
+                it( 'convert specified substring to lower case', function(){
+                    var foobar = "  AB CDEFG   ";
+
+                    var boed = boe(foobar);
+                    var trimmed = boed.trimRight();
+
+                    expect( trimmed ).equal( "  AB CDEFG" );
 
                 })
             })

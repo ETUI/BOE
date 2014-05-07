@@ -9,11 +9,11 @@ if (typeof define !== 'function' && typeof module != 'undefined') {
     var define = require('amdefine')(module);
 }
 //>>excludeEnd("release");
-define(['../util'], function (util) {
+define(['../util', './trimLeft', './trimRight'], function (util, trimLeft, trimRight) {
     var STRING_PROTO = util.g.String.prototype;
     return STRING_PROTO.trim || function() {
-        var trimChar = '\\s';
-        var re = new RegExp('(^' + trimChar + '*)|(' + trimChar + '*$)', 'g');
-        return this.replace(re, "");
+        var ret = trimLeft.call( this );
+        ret = trimRight.call( ret );
+        return ret;
     };
 })
