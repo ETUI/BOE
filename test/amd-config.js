@@ -3,12 +3,12 @@ require.config({
     packages: [
         {
             "name" : "mocha",
-            "location" : "components/mocha",
+            "location" : "lib/mocha",
             "main" : "mocha"
         } ,
         {
             "name" : "chai",
-            "location" : "components/chai",
+            "location" : "lib/chai",
             "main" : "chai"
         } 
     ],

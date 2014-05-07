@@ -3,10 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <title></title>
-    <link rel="stylesheet" href="../components/mocha/mocha.css">
+    <link rel="stylesheet" href="../lib/mocha/mocha.css">
 </head>
 <body>
-    <script type="text/javascript" src="../components/requirejs/require.js"></script>
+    <script type="text/javascript" src="../lib/requirejs/require.js"></script>
     <script type="text/javascript" src="./amd-config.js"></script>
     <script type="text/javascript">
         require(['src/boe', 'src/boe/String' ,'mocha', 'chai'], function (boe, boeString, mocha, chai) {
@@ -82,7 +82,7 @@
                     expect( boe.String.trim ).is.a( 'function' );
                 })
 
-                it( 'convert specified substring to lower case', function(){
+                it( 'trim the space from string at beginning and ending', function(){
                     var foobar = "  AB CDEFG   ";
 
                     var boed = boe(foobar);
@@ -98,13 +98,33 @@
                     expect( boe.String.trimLeft ).is.a( 'function' );
                 })
 
-                it( 'convert specified substring to lower case', function(){
+                it( 'trim the space from string at beginning', function(){
                     var foobar = "  AB CDEFG   ";
 
                     var boed = boe(foobar);
                     var trimmed = boed.trimLeft();
 
                     expect( trimmed ).equal( "AB CDEFG   " );
+
+                })
+
+                it( 'trim the specified char from string at beginning', function(){
+                    var foobar = "___AB_CDEFG___";
+
+                    var boed = boe(foobar);
+                    var trimmed = boed.trimLeft('_');
+
+                    expect( trimmed ).equal( "AB_CDEFG___" );
+
+                })
+
+                it( 'trim the specified special char from string at beginning', function(){
+                    var foobar = "sssABsCDEFGsss";
+
+                    var boed = boe(foobar);
+                    var trimmed = boed.trimLeft('s');
+
+                    expect( trimmed ).equal( "ABsCDEFGsss" );
 
                 })
             })
@@ -114,13 +134,33 @@
                     expect( boe.String.trimRight ).is.a( 'function' );
                 })
 
-                it( 'convert specified substring to lower case', function(){
+                it( 'trim the space from string at ending', function(){
                     var foobar = "  AB CDEFG   ";
 
                     var boed = boe(foobar);
                     var trimmed = boed.trimRight();
 
                     expect( trimmed ).equal( "  AB CDEFG" );
+
+                })
+
+                it( 'trim the specified char from string at ending', function(){
+                    var foobar = "__AB_CDEFG___";
+
+                    var boed = boe(foobar);
+                    var trimmed = boed.trimRight('_');
+
+                    expect( trimmed ).equal( "__AB_CDEFG" );
+
+                })
+
+                it( 'trim the specified special char from string at ending', function(){
+                    var foobar = "sssABsCDEFGsss";
+
+                    var boed = boe(foobar);
+                    var trimmed = boed.trimRight('s');
+
+                    expect( trimmed ).equal( "sssABsCDEFG" );
 
                 })
             })
