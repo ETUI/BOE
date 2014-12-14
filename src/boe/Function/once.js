@@ -9,8 +9,7 @@ if (typeof define !== 'function' && typeof module != 'undefined') {
     var define = require('amdefine')(module);
 }
 //>>excludeEnd("release");
-define(['../util'], function(util){
-    var global = util.g;
+define(['../util', '../global'], function(util, global){
 
     var calledFuncs = [];
     
@@ -23,7 +22,7 @@ define(['../util'], function(util){
         }
         
         return false;
-    };
+    }
     
     function once( callback ){
         var callbackArgs = util.slice(arguments);

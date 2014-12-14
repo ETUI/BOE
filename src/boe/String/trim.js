@@ -9,8 +9,8 @@ if (typeof define !== 'function' && typeof module != 'undefined') {
     var define = require('amdefine')(module);
 }
 //>>excludeEnd("release");
-define(['../util', './trimLeft', './trimRight'], function (util, trimLeft, trimRight) {
-    var STRING_PROTO = util.g.String.prototype;
+define(['../global', './trimLeft', './trimRight'], function (global, trimLeft, trimRight) {
+    var STRING_PROTO = global.String.prototype;
     return STRING_PROTO.trim || function() {
         var ret = trimLeft.call( this );
         ret = trimRight.call( ret );

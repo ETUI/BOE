@@ -6,9 +6,8 @@ if (typeof define !== 'function' && typeof module != 'undefined') {
     var define = require('amdefine')(module);
 }
 //>>excludeEnd("release");
-define(['./util'], function(util){
+define(['./util', './global'], function(util, global){
     "use strict";
-    var global = util.g;
     var ARRAY_PROTO = global.Array.prototype;
     var UNDEF;
     

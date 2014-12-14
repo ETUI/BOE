@@ -9,8 +9,8 @@ if (typeof define !== 'function' && typeof module != 'undefined') {
     var define = require('amdefine')(module);
 }
 //>>excludeEnd("release");
-define(['../util'], function(util){
-    var STRING_PROTO = util.g.String.prototype;
+define(['../global'], function(global){
+    var STRING_PROTO = global.String.prototype;
 
     function toUpperCase(startIndex, endIndex){
         if (startIndex == null && endIndex == null){

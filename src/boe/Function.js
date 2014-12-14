@@ -6,12 +6,11 @@ if (typeof define !== 'function' && typeof module != 'undefined') {
     var define = require('amdefine')(module);
 }
 //>>excludeEnd("release");
-define(['./util', './Function/once', './Function/memorize', './Function/cage'], 
-    function(util, once, memorize, cage){
+define(['./util', './global', './Function/once', './Function/memorize', './Function/cage', './Function/bind'], 
+    function(util, global, once, memorize, cage, bind){
 
     "use strict";
     
-    var global = util.g;
     var FUNCTION_PROTO = global.Function.prototype;
 
     var fnCreator = {};
@@ -86,7 +85,7 @@ define(['./util', './Function/once', './Function/memorize', './Function/cage'],
      * @param {Object} Context The context to be bond to.
      * @es5
      */
-    FUNCTION_PROTO.bind ? (nativeFn.bind = FUNCTION_PROTO.bind):(fn.bind = util.bind);
+    FUNCTION_PROTO.bind ? (nativeFn.bind = FUNCTION_PROTO.bind):(fn.bind = bind);
 
     util.mixin(boeFunction, fnCreator);
     util.mixinAsStatic(boeFunction, fn);

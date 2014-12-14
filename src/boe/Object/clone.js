@@ -3,11 +3,11 @@ if (typeof define !== 'function' && typeof module != 'undefined') {
     var define = require('amdefine')(module);
 }
 //>>excludeEnd("release");
-define(['../util'], function(util){
+define(['../util', '../global'], function(util, global){
 
     var FUNCTION = 'function';
     var OBJECT = 'object';
-    var FUNCTION_PROTO = util.g.Function.prototype;
+    var FUNCTION_PROTO = global.Function.prototype;
 
     var objectCache = [];
     var traverseMark = '__boeObjectClone_Traversed';

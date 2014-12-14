@@ -3,10 +3,8 @@ if (typeof define !== 'function' && typeof module != 'undefined') {
     var define = require('amdefine')(module);
 }
 //>>excludeEnd("release");
-define(function(){
+define(['./global', './Function/bind'], function(global, bind){
     "use strict";
-    
-    var global = (Function("return this"))();
 
     var OBJECT_PROTO = global.Object.prototype;
     var ARRAY_PROTO = global.Array.prototype;
@@ -20,7 +18,7 @@ define(function(){
                     continue;
                 }
 
-                target[key] = ret.bind.call(FUNCTION_PROTO.call, fn[key]);
+                target[key] = bind.call(FUNCTION_PROTO.call, fn[key]);
             }
 
             return target;
@@ -47,17 +45,6 @@ define(function(){
             }
 
             return target;
-        },
-        bind: function(context) {
-            var slice = ARRAY_PROTO.slice;
-            var __method = this, args = slice.call(arguments);
-            args.shift();
-            return function wrapper() {
-                if (this instanceof wrapper){
-                    context = this;
-                }
-                return __method.apply(context, args.concat(slice.call(arguments)));
-            };
         },
         slice: function(arr) {
             return ARRAY_PROTO.slice.call(arr);

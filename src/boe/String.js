@@ -6,12 +6,11 @@ if (typeof define !== 'function' && typeof module != 'undefined') {
     var define = require('amdefine')(module);
 }
 //>>excludeEnd("release");
-define(['./util', './String/toUpperCase', './String/toLowerCase', './String/format', './String/trim', './String/trimLeft', './String/trimRight'], 
-    function(util, toUpperCase, toLowerCase, format, trim, trimLeft, trimRight){
+define(['./util', './global', './String/toUpperCase', './String/toLowerCase', './String/format', './String/trim', './String/trimLeft', './String/trimRight'], 
+    function(util, global, toUpperCase, toLowerCase, format, trim, trimLeft, trimRight){
 
     "use strict";
 
-    var global = util.g;
     var STRING_PROTO = global.String.prototype;
 
     var fn = {};

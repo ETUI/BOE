@@ -75,10 +75,31 @@ var require, define;
 }());
 define("../lib/amdshim/amdshim", function(){});
 
-define('boe/util',[],function(){
+define('boe/global',[],function () {
+    return (Function("return this"))();
+});
+/*
+ * Function.bind
+ */
+define('boe/Function/bind',['../global'], function (global) {
+    // simply alias it
+    var FUNCTION_PROTO = global.Function.prototype;
+    var ARRAY_PROTO = global.Array.prototype;
+
+    return FUNCTION_PROTO.bind || function(context) {
+        var slice = ARRAY_PROTO.slice;
+        var __method = this, args = slice.call(arguments);
+        args.shift();
+        return function wrapper() {
+            if (this instanceof wrapper){
+                context = this;
+            }
+            return __method.apply(context, args.concat(slice.call(arguments)));
+        };
+    };
+});
+define('boe/util',['./global', './Function/bind'], function(global, bind){
     
-    
-    var global = (Function("return this"))();
 
     var OBJECT_PROTO = global.Object.prototype;
     var ARRAY_PROTO = global.Array.prototype;
@@ -92,7 +113,7 @@ define('boe/util',[],function(){
                     continue;
                 }
 
-                target[key] = ret.bind.call(FUNCTION_PROTO.call, fn[key]);
+                target[key] = bind.call(FUNCTION_PROTO.call, fn[key]);
             }
 
             return target;
@@ -120,17 +141,6 @@ define('boe/util',[],function(){
 
             return target;
         },
-        bind: function(context) {
-            var slice = ARRAY_PROTO.slice;
-            var __method = this, args = slice.call(arguments);
-            args.shift();
-            return function wrapper() {
-                if (this instanceof wrapper){
-                    context = this;
-                }
-                return __method.apply(context, args.concat(slice.call(arguments)));
-            };
-        },
         slice: function(arr) {
             return ARRAY_PROTO.slice.call(arr);
         },
@@ -142,9 +152,8 @@ define('boe/util',[],function(){
 /* 
  * Array extensions
  */
-define('boe/Array',['./util'], function(util){
+define('boe/Array',['./util', './global'], function(util, global){
     
-    var global = util.g;
     var ARRAY_PROTO = global.Array.prototype;
     var UNDEF;
     
@@ -610,8 +619,7 @@ define('boe/Array',['./util'], function(util){
  * @param context the context to run the function
  * @param arguments the arguments to be passed.
  **/
-define('boe/Function/once',['../util'], function(util){
-    var global = util.g;
+define('boe/Function/once',['../util', '../global'], function(util, global){
 
     var calledFuncs = [];
     
@@ -624,7 +632,7 @@ define('boe/Function/once',['../util'], function(util){
         }
         
         return false;
-    };
+    }
     
     function once( callback ){
         var callbackArgs = util.slice(arguments);
@@ -752,12 +760,11 @@ define('boe/Function/cage',['../util'], function(util){
 /* 
  * Function extensions
  */
-define('boe/Function',['./util', './Function/once', './Function/memorize', './Function/cage'], 
-    function(util, once, memorize, cage){
+define('boe/Function',['./util', './global', './Function/once', './Function/memorize', './Function/cage', './Function/bind'], 
+    function(util, global, once, memorize, cage, bind){
 
     
     
-    var global = util.g;
     var FUNCTION_PROTO = global.Function.prototype;
 
     var fnCreator = {};
@@ -832,7 +839,7 @@ define('boe/Function',['./util', './Function/once', './Function/memorize', './Fu
      * @param {Object} Context The context to be bond to.
      * @es5
      */
-    FUNCTION_PROTO.bind ? (nativeFn.bind = FUNCTION_PROTO.bind):(fn.bind = util.bind);
+    FUNCTION_PROTO.bind ? (nativeFn.bind = FUNCTION_PROTO.bind):(fn.bind = bind);
 
     util.mixin(boeFunction, fnCreator);
     util.mixinAsStatic(boeFunction, fn);
@@ -1012,11 +1019,11 @@ define('boe/Object/chainable',['../util'], function(util){
     return chainable;
 
 });
-define('boe/Object/shadow',['../util'], function (util) {
+define('boe/Object/shadow',['../util', '../global'], function (util, global) {
 
     var FUNCTION = 'function';
     var OBJECT = 'object';
-    var FUNCTION_PROTO = util.g.Function.prototype;
+    var FUNCTION_PROTO = global.Function.prototype;
     var UNDEF;
 
     function Cloner(){
@@ -1084,11 +1091,11 @@ define('boe/Object/shadow',['../util'], function (util) {
 
     return boeObjectFastClone;
 });
-define('boe/Object/clone',['../util'], function(util){
+define('boe/Object/clone',['../util', '../global'], function(util, global){
 
     var FUNCTION = 'function';
     var OBJECT = 'object';
-    var FUNCTION_PROTO = util.g.Function.prototype;
+    var FUNCTION_PROTO = global.Function.prototype;
 
     var objectCache = [];
     var traverseMark = '__boeObjectClone_Traversed';
@@ -1207,8 +1214,8 @@ define('boe/Object',['./util', './Object/chainable', './Object/shadow', './Objec
  *
  * @return {String} Upper cased string
  */
-define('boe/String/toUpperCase',['../util'], function(util){
-    var STRING_PROTO = util.g.String.prototype;
+define('boe/String/toUpperCase',['../global'], function(global){
+    var STRING_PROTO = global.String.prototype;
 
     function toUpperCase(startIndex, endIndex){
         if (startIndex == null && endIndex == null){
@@ -1232,8 +1239,8 @@ define('boe/String/toUpperCase',['../util'], function(util){
  *
  * @return {String} Upper cased string
  */
-define('boe/String/toLowerCase',['../util'], function(util){
-    var STRING_PROTO = util.g.String.prototype;
+define('boe/String/toLowerCase',['../global'], function(global){
+    var STRING_PROTO = global.String.prototype;
 
     function toLowerCase(startIndex, endIndex){
         if (startIndex == null && endIndex == null){
@@ -1247,7 +1254,7 @@ define('boe/String/toLowerCase',['../util'], function(util){
         var substr = this.substring(startIndex, endIndex).toLowerCase();
         // concat and return
         return this.substring(0, startIndex) + substr + this.substring(endIndex, this.length);
-    };
+    }
 
     return toLowerCase;
 });
@@ -1268,9 +1275,19 @@ define('boe/String/format',[],function () {
  * @member String.prototype
  * @return {String} trimed string
  */
-define('boe/String/trimLeft',[],function () {
-    return function() {
-        var trimChar = '\\s';
+define('boe/String/trimLeft',['../util'], function (util) {
+    return function( trimChar ) {
+        var hex;
+        if ( util.type(trimChar) == 'String' ) {
+            hex = trimChar.charCodeAt(0).toString(16);
+            trimChar = hex.length <= 2 ? '\\x' + hex : '\\u' + hex;
+        }
+        else if ( trimChar instanceof RegExp ) {
+            // leave it as is
+        }
+        else {
+            trimChar = '\\s';
+        }
         var re = new RegExp('(^' + trimChar + '*)', 'g');
         return this.replace(re, "");
     };
@@ -1280,9 +1297,19 @@ define('boe/String/trimLeft',[],function () {
  * @member String.prototype
  * @return {String} trimed string
  */
-define('boe/String/trimRight',[], function () {
-    return function() {
-        var trimChar = '\\s';
+define('boe/String/trimRight',['../util'], function (util) {
+    return function( trimChar ) {
+        var hex;
+        if ( util.type(trimChar) == 'String' ) {
+            hex = trimChar.charCodeAt(0).toString(16);
+            trimChar = hex.length <= 2 ? '\\x' + hex : '\\u' + hex;
+        }
+        else if ( trimChar instanceof RegExp ) {
+            // leave it as is
+        }
+        else {
+            trimChar = '\\s';
+        }
         var re = new RegExp('(' + trimChar + '*$)', 'g');
         return this.replace(re, "");
     };
@@ -1293,8 +1320,8 @@ define('boe/String/trimRight',[], function () {
  * @return {String} trimed string
  * @es5
  */
-define('boe/String/trim',['../util', './trimLeft', './trimRight'], function (util, trimLeft, trimRight) {
-    var STRING_PROTO = util.g.String.prototype;
+define('boe/String/trim',['../global', './trimLeft', './trimRight'], function (global, trimLeft, trimRight) {
+    var STRING_PROTO = global.String.prototype;
     return STRING_PROTO.trim || function() {
         var ret = trimLeft.call( this );
         ret = trimRight.call( ret );
@@ -1304,12 +1331,11 @@ define('boe/String/trim',['../util', './trimLeft', './trimRight'], function (uti
 /* 
  * String extensions
  */
-define('boe/String',['./util', './String/toUpperCase', './String/toLowerCase', './String/format', './String/trim', './String/trimLeft', './String/trimRight'], 
-    function(util, toUpperCase, toLowerCase, format, trim, trimLeft, trimRight){
+define('boe/String',['./util', './global', './String/toUpperCase', './String/toLowerCase', './String/format', './String/trim', './String/trimLeft', './String/trimRight'], 
+    function(util, global, toUpperCase, toLowerCase, format, trim, trimLeft, trimRight){
 
     
 
-    var global = util.g;
     var STRING_PROTO = global.String.prototype;
 
     var fn = {};
