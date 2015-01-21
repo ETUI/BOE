@@ -1,6 +1,5 @@
 (function() { 
-var global = new Function('return this')();var myDefine = (function(factory){ var ret = factory();typeof module != 'undefined' && (module.exports = ret);global.define && global.define(function(){return ret;});global.boe = ret; });
-var require, define;
+var global = new Function('return this')();var myDefine = (function(factory){ var ret = factory();typeof module != 'undefined' && (module.exports = ret);global.define && define(function(){return ret;});global.boe = ret; });var require, define;
 (function (undef) {
     var mod = {}, g = this;
     function resolvePath(base, relative){
@@ -8,8 +7,13 @@ var require, define;
 
         base = base.split('/');
         relative = relative.split('/');
-        base.pop();
-        ret = base.concat(relative);
+        if ( relative[0] == '.' || relative[0] == '..' ) {
+            base.pop();
+            ret = base.concat(relative);
+        }
+        else {
+            ret = relative;
+        }
 
         for(l = ret.length ; l--; ){
             if ( ret[l] == '.' ) {
@@ -27,14 +31,49 @@ var require, define;
         }
         return ret.join('/');
     }
-    define = function( id, deps, factory ){
+    define = function( ){
+        var i, arg, id, deps, factory;
+        id = arguments[0];
+        deps = arguments[1];
+        factory = arguments[2];
+
+        if ( !factory ) { 
+            id = null;
+            deps = [];
+
+            for( i = 0 ; i < arguments.length; i++ ) {
+                arg = arguments[i];
+                if ( typeof arg == 'object' && 'length' in arg ) {
+                    deps = arg;
+                }
+                else if ( typeof arg == 'object' ) {
+                    factory = (function(ret) { return function(){ return ret; }})(arg);
+                }
+                else if ( typeof arg == 'function' ) {
+                    factory = arg;
+                }
+                else if ( typeof arg == 'string' ) {
+                    id = arg
+                }
+            }
+
+            if ( id == null ) {
+                id = NA + '/' + aCount++;
+            }
+            
+            return define.call(g, id, deps, factory);
+        }
+        if ( id in mod ) {
+            // oops, duplicated download?
+            return;   
+        }
         mod[id] = {
             p: id,
             d: deps,
             f: factory
         };
     };
-    define.amd = true;
+    define.amd = {};
     require = function(deps, factory){
         var module = this;
         var resolved = [], cur, relative, absolute;
@@ -66,14 +105,17 @@ var require, define;
 
         resolved.push(require, {});
         if ( factory ) {
-            return factory.apply(g, resolved);
+            if ( !('o' in module) ) {
+                module.o = factory.apply(g, resolved);
+            }
+            return module.o;
         }
         else {
             return resolved[0];
         }
     };
 }());
-define("../lib/amdshim/amdshim", function(){});
+define("../lib/amdshim/amdshim.embed", function(){});
 
 define('boe/global',[],function () {
     return (Function("return this"))();
@@ -1472,5 +1514,6 @@ define('boe',['./boe/util', './boe/Array', './boe/Function', './boe/Number', './
     boe.String = boeString;
 
     return boe;
-});myDefine(function() { return require('boe'); }); 
+});
+myDefine(function() { return require('boe'); }); 
 }());
