@@ -1,5 +1,5 @@
 (function() { 
-var global = new Function('return this')();var myDefine = (function(factory){ var ret = factory();typeof module != 'undefined' && (module.exports = ret);global.define && define(function(){return ret;});global.boe = ret; });var require, define;
+var global = new Function('return this')();var myDefine = (function(factory){ var ret = factory();typeof module != 'undefined' && (module.exports = ret);(function(define){define && define(function(){return ret;});})(global.define);global.boe = ret; });var require, define;
 (function (undef) {
     var mod = {}, g = this;
     function resolvePath(base, relative){
